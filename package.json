@@ -1,0 +1,23 @@
+{
+  "name": "atletpay",
+  "version": "1.0.0",
+  "description": "mvp backend with expressjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Samuel Werlang",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
+    "@prisma/client": "^7.2.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "pg": "^8.16.3",
+    "prisma": "^7.2.0",
+    "uuid": "^13.0.0"
+  }
+}

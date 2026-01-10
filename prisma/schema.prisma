@@ -1,0 +1,110 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  PERSONAL
+  ADMIN
+}
+
+enum ChargeStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+enum BillingInterval {
+  MONTHLY
+  WEEKLY
+}
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+} 
+
+model User {
+  id  String @id @default(uuid())
+  email String @unique
+  password String
+  role UserRole @default(PERSONAL)
+
+  students Student[]
+  subscription Subscription?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id String @id @default(uuid())
+  email String @unique
+  phone String? 
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+
+  charges Charge[]
+  recurringCharges RecurringCharge[]
+
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}
+
+model Charge {
+  id String @id @default(uuid())
+  amount Int //cents
+  dueDate DateTime 
+  status ChargeStatus
+  description String?
+
+  studentId String
+  student Student @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model RecurringCharge {
+  id String @id @default(uuid())
+  amount Int 
+  interval BillingInterval 
+  startDate DateTime
+  active Boolean @default(true)
+
+  studentId String
+  student Student @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Plan {
+  id String @id @default(uuid())
+  name String
+  amount Int // cents
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id String @id @default(uuid())
+  status SubscriptionStatus
+
+  userId String @unique
+  planId String
+
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+}

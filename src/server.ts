@@ -1,6 +1,7 @@
-import { app } from "./app"
-import express from "express"
+import 'dotenv/config'
+import app from './app.js'
+import config from './config.js'
 
-app.listen(3000, () => {
-    console.log(`Example function listening`)
+app.listen(config.PORT, () => {
+  console.log(`Running on port ${config.PORT}`)
 })

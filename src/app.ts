@@ -1,11 +1,12 @@
-// import { env } from "./config/env"
-import express, {Express, Request, Response} from "express"
-export const app: Express = express()
+import express from 'express'
+import { jwtCheck } from './modules/auth/auth.middleware.js'
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World!')
+const app = express()
+
+app.use(jwtCheck)
+
+app.get('/authorized', (req, res) => {
+  res.send('Secured Resource')
 })
 
-app.listen(3000, () => {
-    console.log(`Example function listening`)
-})
+export default app

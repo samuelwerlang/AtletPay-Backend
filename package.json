@@ -1,5 +1,6 @@
 {
   "name": "atletpay",
+  "type": "commonjs",
   "version": "1.0.0",
   "description": "mvp backend with expressjs",
   "main": "index.js",
@@ -9,6 +10,9 @@
   "author": "Samuel Werlang",
   "license": "ISC",
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.5",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import express from 'express'
-import { jwtCheck } from './modules/auth/auth.middleware.js'
+import { jwtCheck } from './middlewares/auth.middleware.js'
 
 const app = express()
 

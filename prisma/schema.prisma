@@ -17,6 +17,17 @@ enum UserRole {
   PERSONAL
   ADMIN
 }
+enum SAAS_PLAN_TYPE {
+  FREE
+  BASIC
+  PRO 
+  PREMIUM
+}
+
+enum StudentPlanStatus {
+  ACTIVE
+  INACTIVE
+}
 
 enum ChargeStatus {
   PENDING
@@ -33,15 +44,28 @@ enum SubscriptionStatus {
   ACTIVE
   CANCELED
   PAST_DUE
+  INCOMPLETE
 } 
+
+enum EXPENSE_CATEGORY {
+  EQUIPMENT
+  MARKETING
+  RENT
+  TRANSPORTATION
+  FEEDING
+  OTHERS
+}
+
 
 model User {
   id  String @id @default(uuid())
   email String @unique
-  password String
+  auth0Id String @unique
   role UserRole @default(PERSONAL)
 
   students Student[]
+  expenses Expense[]
+  plans PersonalPlan[]
   subscription Subscription?
 
   createdAt DateTime @default(now())
@@ -50,11 +74,12 @@ model User {
 
 model Student {
   id String @id @default(uuid())
-  email String @unique
+  name String
+  email String?
   phone String? 
-
-  userId String
-  user User @relation(fields: [userId], references: [id])
+  plans StudentPlan[]
+  personalId String
+  personal User @relation(fields: [personalId], references: [id])
 
 
   charges Charge[]
@@ -62,6 +87,23 @@ model Student {
 
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
+
+  @@index([personalId])
+}
+
+model Expense {
+  id String @id @default(uuid())
+  name String
+  description String?
+  amount Int //Cents
+  date DateTime
+  category EXPENSE_CATEGORY
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Charge {
@@ -75,6 +117,9 @@ model Charge {
   student Student @relation(fields: [studentId], references: [id])
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
 }
 
 model RecurringCharge {
@@ -90,21 +135,87 @@ model RecurringCharge {
   createdAt DateTime @default(now())
 }
 
-model Plan {
+model PersonalPlan {
   id String @id @default(uuid())
   name String
-  amount Int // cents
+  price Int //cents
+  sessionsPerWeek Int
+  durationInWeeks Int
+  description String
+
+  isActive Boolean @default(true)
+  personalId String
+  personal User @relation(fields: [personalId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  studentPlans StudentPlan[]
+
+  @@index([personalId])
+}
+
+model StudentPlan {
+  id String @id @default(uuid())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id])
+
+  planId String
+  plan PersonalPlan @relation(fields: [planId], references: [id])
+
+  status StudentPlanStatus @default(ACTIVE)
+
+  startDate DateTime @default(now())
+  endDate DateTime?
+
+  priceAtPurchase Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@index([planId])
+}
+
+model SaasPlan {
+  id String @id @default(uuid())
+  saasPlanType SAAS_PLAN_TYPE @unique
+
+  name String
+  price Int //cents
+
+  StripePriceId String @unique
+
+  maxStudents Int?
+  maxPlans Int?
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   subscriptions Subscription[]
 }
 
 model Subscription {
   id String @id @default(uuid())
-  status SubscriptionStatus
+  status SubscriptionStatus @default(ACTIVE)
 
   userId String @unique
-  planId String
-
   user User @relation(fields: [userId], references: [id])
-  plan Plan @relation(fields: [planId], references: [id])
+
+  saasPlanId String
+  saasPlan SaasPlan @relation(fields: [saasPlanId], references: [id])
+
+  stripeSubscriptionId String @unique
+  stripeCustomerId String
+
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+
+  cancelAtPeriodEnd Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

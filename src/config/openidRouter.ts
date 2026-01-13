@@ -1,14 +1,23 @@
-// import config from "./config.js"
+import config from "./config.js"
 // import { auth } from 'express-openid-connect';
 // // import app from "../app.js"
 
-const opidRouterConfig = {
+interface IopId {
+  authRequired : boolean
+  auth0Logout :  boolean 
+  secret : string
+  baseURL : string
+  clientID : string
+  issuerBaseURL : string
+}
+
+const opidRouterConfig : IopId = {
   authRequired: false,
   auth0Logout: true,
-  secret: "885f634ab793b24fd1c56a6f34f48fa641434dcc866bf4c195d7fecca552bd99",
-  baseURL: 'http://localhost:8080',
-  clientID: 'oFtjBC2E0ZeyUf5sNUV1h9PazuTI1s8r',
-  issuerBaseURL: 'https://atletpay.us.auth0.com'
+  secret: String(config.secret),
+  baseURL: String(config.baseurl),
+  clientID: String(config.clientId),
+  issuerBaseURL: String(config.issuerBaseUrl)
 };
 
 export default opidRouterConfig;

@@ -17,8 +17,8 @@
 
 import * as runtime from "@prisma/client/runtime/index-browser"
 
-export type * from '../models.ts'
-export type * from './prismaNamespace.ts'
+export type * from '../models.js'
+export type * from './prismaNamespace.js'
 
 export const Decimal = runtime.Decimal
 
@@ -53,9 +53,12 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   Student: 'Student',
+  Expense: 'Expense',
   Charge: 'Charge',
   RecurringCharge: 'RecurringCharge',
-  Plan: 'Plan',
+  PersonalPlan: 'PersonalPlan',
+  StudentPlan: 'StudentPlan',
+  SaasPlan: 'SaasPlan',
   Subscription: 'Subscription'
 } as const
 
@@ -77,8 +80,9 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  auth0Id: 'auth0Id',
   email: 'email',
-  password: 'password',
+  name: 'name',
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -89,14 +93,30 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const StudentScalarFieldEnum = {
   id: 'id',
+  name: 'name',
   email: 'email',
   phone: 'phone',
-  userId: 'userId',
+  personalId: 'personalId',
   updatedAt: 'updatedAt',
   createdAt: 'createdAt'
 } as const
 
 export type StudentScalarFieldEnum = (typeof StudentScalarFieldEnum)[keyof typeof StudentScalarFieldEnum]
+
+
+export const ExpenseScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  amount: 'amount',
+  date: 'date',
+  category: 'category',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ExpenseScalarFieldEnum = (typeof ExpenseScalarFieldEnum)[keyof typeof ExpenseScalarFieldEnum]
 
 
 export const ChargeScalarFieldEnum = {
@@ -106,7 +126,8 @@ export const ChargeScalarFieldEnum = {
   status: 'status',
   description: 'description',
   studentId: 'studentId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type ChargeScalarFieldEnum = (typeof ChargeScalarFieldEnum)[keyof typeof ChargeScalarFieldEnum]
@@ -125,20 +146,65 @@ export const RecurringChargeScalarFieldEnum = {
 export type RecurringChargeScalarFieldEnum = (typeof RecurringChargeScalarFieldEnum)[keyof typeof RecurringChargeScalarFieldEnum]
 
 
-export const PlanScalarFieldEnum = {
+export const PersonalPlanScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  amount: 'amount'
+  price: 'price',
+  sessionsPerWeek: 'sessionsPerWeek',
+  durationInWeeks: 'durationInWeeks',
+  description: 'description',
+  isActive: 'isActive',
+  personalId: 'personalId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
-export type PlanScalarFieldEnum = (typeof PlanScalarFieldEnum)[keyof typeof PlanScalarFieldEnum]
+export type PersonalPlanScalarFieldEnum = (typeof PersonalPlanScalarFieldEnum)[keyof typeof PersonalPlanScalarFieldEnum]
+
+
+export const StudentPlanScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  planId: 'planId',
+  status: 'status',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  priceAtPurchase: 'priceAtPurchase',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StudentPlanScalarFieldEnum = (typeof StudentPlanScalarFieldEnum)[keyof typeof StudentPlanScalarFieldEnum]
+
+
+export const SaasPlanScalarFieldEnum = {
+  id: 'id',
+  saasPlanType: 'saasPlanType',
+  name: 'name',
+  price: 'price',
+  StripePriceId: 'StripePriceId',
+  maxStudents: 'maxStudents',
+  maxPlans: 'maxPlans',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SaasPlanScalarFieldEnum = (typeof SaasPlanScalarFieldEnum)[keyof typeof SaasPlanScalarFieldEnum]
 
 
 export const SubscriptionScalarFieldEnum = {
   id: 'id',
   status: 'status',
   userId: 'userId',
-  planId: 'planId'
+  saasPlanId: 'saasPlanId',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  stripeCustomerId: 'stripeCustomerId',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]

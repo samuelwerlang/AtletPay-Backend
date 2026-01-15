@@ -17,6 +17,24 @@ export const UserRole = {
 export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 
+export const SAAS_PLAN_TYPE = {
+  FREE: 'FREE',
+  BASIC: 'BASIC',
+  PRO: 'PRO',
+  PREMIUM: 'PREMIUM'
+} as const
+
+export type SAAS_PLAN_TYPE = (typeof SAAS_PLAN_TYPE)[keyof typeof SAAS_PLAN_TYPE]
+
+
+export const StudentPlanStatus = {
+  ACTIVE: 'ACTIVE',
+  INACTIVE: 'INACTIVE'
+} as const
+
+export type StudentPlanStatus = (typeof StudentPlanStatus)[keyof typeof StudentPlanStatus]
+
+
 export const ChargeStatus = {
   PENDING: 'PENDING',
   PAID: 'PAID',
@@ -38,7 +56,20 @@ export type BillingInterval = (typeof BillingInterval)[keyof typeof BillingInter
 export const SubscriptionStatus = {
   ACTIVE: 'ACTIVE',
   CANCELED: 'CANCELED',
-  PAST_DUE: 'PAST_DUE'
+  PAST_DUE: 'PAST_DUE',
+  INCOMPLETE: 'INCOMPLETE'
 } as const
 
 export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus]
+
+
+export const EXPENSE_CATEGORY = {
+  EQUIPMENT: 'EQUIPMENT',
+  MARKETING: 'MARKETING',
+  RENT: 'RENT',
+  TRANSPORTATION: 'TRANSPORTATION',
+  FEEDING: 'FEEDING',
+  OTHERS: 'OTHERS'
+} as const
+
+export type EXPENSE_CATEGORY = (typeof EXPENSE_CATEGORY)[keyof typeof EXPENSE_CATEGORY]

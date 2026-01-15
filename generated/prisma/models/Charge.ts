@@ -9,8 +9,8 @@
  * 🟢 You can import this file directly.
  */
 import type * as runtime from "@prisma/client/runtime/client"
-import type * as $Enums from "../enums.ts"
-import type * as Prisma from "../internal/prismaNamespace.ts"
+import type * as $Enums from "../enums.js"
+import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model Charge
@@ -42,6 +42,7 @@ export type ChargeMinAggregateOutputType = {
   description: string | null
   studentId: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type ChargeMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type ChargeMaxAggregateOutputType = {
   description: string | null
   studentId: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type ChargeCountAggregateOutputType = {
@@ -62,6 +64,7 @@ export type ChargeCountAggregateOutputType = {
   description: number
   studentId: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -82,6 +85,7 @@ export type ChargeMinAggregateInputType = {
   description?: true
   studentId?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type ChargeMaxAggregateInputType = {
@@ -92,6 +96,7 @@ export type ChargeMaxAggregateInputType = {
   description?: true
   studentId?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type ChargeCountAggregateInputType = {
@@ -102,6 +107,7 @@ export type ChargeCountAggregateInputType = {
   description?: true
   studentId?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -199,6 +205,7 @@ export type ChargeGroupByOutputType = {
   description: string | null
   studentId: string
   createdAt: Date
+  updatedAt: Date
   _count: ChargeCountAggregateOutputType | null
   _avg: ChargeAvgAggregateOutputType | null
   _sum: ChargeSumAggregateOutputType | null
@@ -232,6 +239,7 @@ export type ChargeWhereInput = {
   description?: Prisma.StringNullableFilter<"Charge"> | string | null
   studentId?: Prisma.StringFilter<"Charge"> | string
   createdAt?: Prisma.DateTimeFilter<"Charge"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Charge"> | Date | string
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
 }
 
@@ -243,6 +251,7 @@ export type ChargeOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   studentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   student?: Prisma.StudentOrderByWithRelationInput
 }
 
@@ -257,6 +266,7 @@ export type ChargeWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Charge"> | string | null
   studentId?: Prisma.StringFilter<"Charge"> | string
   createdAt?: Prisma.DateTimeFilter<"Charge"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Charge"> | Date | string
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
 }, "id">
 
@@ -268,6 +278,7 @@ export type ChargeOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   studentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.ChargeCountOrderByAggregateInput
   _avg?: Prisma.ChargeAvgOrderByAggregateInput
   _max?: Prisma.ChargeMaxOrderByAggregateInput
@@ -286,6 +297,7 @@ export type ChargeScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Charge"> | string | null
   studentId?: Prisma.StringWithAggregatesFilter<"Charge"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Charge"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Charge"> | Date | string
 }
 
 export type ChargeCreateInput = {
@@ -295,6 +307,7 @@ export type ChargeCreateInput = {
   status: $Enums.ChargeStatus
   description?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   student: Prisma.StudentCreateNestedOneWithoutChargesInput
 }
 
@@ -306,6 +319,7 @@ export type ChargeUncheckedCreateInput = {
   description?: string | null
   studentId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ChargeUpdateInput = {
@@ -315,6 +329,7 @@ export type ChargeUpdateInput = {
   status?: Prisma.EnumChargeStatusFieldUpdateOperationsInput | $Enums.ChargeStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.StudentUpdateOneRequiredWithoutChargesNestedInput
 }
 
@@ -326,6 +341,7 @@ export type ChargeUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ChargeCreateManyInput = {
@@ -336,6 +352,7 @@ export type ChargeCreateManyInput = {
   description?: string | null
   studentId: string
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ChargeUpdateManyMutationInput = {
@@ -345,6 +362,7 @@ export type ChargeUpdateManyMutationInput = {
   status?: Prisma.EnumChargeStatusFieldUpdateOperationsInput | $Enums.ChargeStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ChargeUncheckedUpdateManyInput = {
@@ -355,6 +373,7 @@ export type ChargeUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ChargeListRelationFilter = {
@@ -375,6 +394,7 @@ export type ChargeCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ChargeAvgOrderByAggregateInput = {
@@ -389,6 +409,7 @@ export type ChargeMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ChargeMinOrderByAggregateInput = {
@@ -399,6 +420,7 @@ export type ChargeMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ChargeSumOrderByAggregateInput = {
@@ -447,14 +469,6 @@ export type ChargeUncheckedUpdateManyWithoutStudentNestedInput = {
   deleteMany?: Prisma.ChargeScalarWhereInput | Prisma.ChargeScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type EnumChargeStatusFieldUpdateOperationsInput = {
   set?: $Enums.ChargeStatus
 }
@@ -466,6 +480,7 @@ export type ChargeCreateWithoutStudentInput = {
   status: $Enums.ChargeStatus
   description?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ChargeUncheckedCreateWithoutStudentInput = {
@@ -475,6 +490,7 @@ export type ChargeUncheckedCreateWithoutStudentInput = {
   status: $Enums.ChargeStatus
   description?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ChargeCreateOrConnectWithoutStudentInput = {
@@ -514,6 +530,7 @@ export type ChargeScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Charge"> | string | null
   studentId?: Prisma.StringFilter<"Charge"> | string
   createdAt?: Prisma.DateTimeFilter<"Charge"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Charge"> | Date | string
 }
 
 export type ChargeCreateManyStudentInput = {
@@ -523,6 +540,7 @@ export type ChargeCreateManyStudentInput = {
   status: $Enums.ChargeStatus
   description?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ChargeUpdateWithoutStudentInput = {
@@ -532,6 +550,7 @@ export type ChargeUpdateWithoutStudentInput = {
   status?: Prisma.EnumChargeStatusFieldUpdateOperationsInput | $Enums.ChargeStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ChargeUncheckedUpdateWithoutStudentInput = {
@@ -541,6 +560,7 @@ export type ChargeUncheckedUpdateWithoutStudentInput = {
   status?: Prisma.EnumChargeStatusFieldUpdateOperationsInput | $Enums.ChargeStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ChargeUncheckedUpdateManyWithoutStudentInput = {
@@ -550,6 +570,7 @@ export type ChargeUncheckedUpdateManyWithoutStudentInput = {
   status?: Prisma.EnumChargeStatusFieldUpdateOperationsInput | $Enums.ChargeStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -562,6 +583,7 @@ export type ChargeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   description?: boolean
   studentId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -573,6 +595,7 @@ export type ChargeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   description?: boolean
   studentId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -584,6 +607,7 @@ export type ChargeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   description?: boolean
   studentId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["charge"]>
 
@@ -595,9 +619,10 @@ export type ChargeSelectScalar = {
   description?: boolean
   studentId?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type ChargeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "amount" | "dueDate" | "status" | "description" | "studentId" | "createdAt", ExtArgs["result"]["charge"]>
+export type ChargeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "amount" | "dueDate" | "status" | "description" | "studentId" | "createdAt" | "updatedAt", ExtArgs["result"]["charge"]>
 export type ChargeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
 }
@@ -621,6 +646,7 @@ export type $ChargePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     description: string | null
     studentId: string
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["charge"]>
   composites: {}
 }
@@ -1052,6 +1078,7 @@ export interface ChargeFieldRefs {
   readonly description: Prisma.FieldRef<"Charge", 'String'>
   readonly studentId: Prisma.FieldRef<"Charge", 'String'>
   readonly createdAt: Prisma.FieldRef<"Charge", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Charge", 'DateTime'>
 }
     
 

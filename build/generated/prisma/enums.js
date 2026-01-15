@@ -11,6 +11,16 @@ export const UserRole = {
     PERSONAL: 'PERSONAL',
     ADMIN: 'ADMIN'
 };
+export const SAAS_PLAN_TYPE = {
+    FREE: 'FREE',
+    BASIC: 'BASIC',
+    PRO: 'PRO',
+    PREMIUM: 'PREMIUM'
+};
+export const StudentPlanStatus = {
+    ACTIVE: 'ACTIVE',
+    INACTIVE: 'INACTIVE'
+};
 export const ChargeStatus = {
     PENDING: 'PENDING',
     PAID: 'PAID',
@@ -24,5 +34,14 @@ export const BillingInterval = {
 export const SubscriptionStatus = {
     ACTIVE: 'ACTIVE',
     CANCELED: 'CANCELED',
-    PAST_DUE: 'PAST_DUE'
+    PAST_DUE: 'PAST_DUE',
+    INCOMPLETE: 'INCOMPLETE'
+};
+export const EXPENSE_CATEGORY = {
+    EQUIPMENT: 'EQUIPMENT',
+    MARKETING: 'MARKETING',
+    RENT: 'RENT',
+    TRANSPORTATION: 'TRANSPORTATION',
+    FEEDING: 'FEEDING',
+    OTHERS: 'OTHERS'
 };

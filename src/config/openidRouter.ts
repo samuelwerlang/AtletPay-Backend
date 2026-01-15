@@ -2,7 +2,7 @@ import config from "./config.js"
 // import { auth } from 'express-openid-connect';
 // // import app from "../app.js"
 
-interface IopId {
+interface IopIdConfig {
   authRequired : boolean
   auth0Logout :  boolean 
   secret : string
@@ -11,13 +11,13 @@ interface IopId {
   issuerBaseURL : string
 }
 
-const opidRouterConfig : IopId = {
+const opidRouterConfig : IopIdConfig = {
   authRequired: false,
   auth0Logout: true,
-  secret: String(config.secret),
-  baseURL: String(config.baseurl),
-  clientID: String(config.clientId),
-  issuerBaseURL: String(config.issuerBaseUrl)
+  secret: config.secret,
+  baseURL : String(config.baseurl),
+  clientID: config.clientId,
+  issuerBaseURL: config.issuerBaseUrl
 };
 
 export default opidRouterConfig;

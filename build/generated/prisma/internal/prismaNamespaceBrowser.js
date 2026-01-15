@@ -41,9 +41,12 @@ export const AnyNull = runtime.AnyNull;
 export const ModelName = {
     User: 'User',
     Student: 'Student',
+    Expense: 'Expense',
     Charge: 'Charge',
     RecurringCharge: 'RecurringCharge',
-    Plan: 'Plan',
+    PersonalPlan: 'PersonalPlan',
+    StudentPlan: 'StudentPlan',
+    SaasPlan: 'SaasPlan',
     Subscription: 'Subscription'
 };
 /*
@@ -57,19 +60,32 @@ export const TransactionIsolationLevel = {
 };
 export const UserScalarFieldEnum = {
     id: 'id',
+    auth0Id: 'auth0Id',
     email: 'email',
-    password: 'password',
+    name: 'name',
     role: 'role',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };
 export const StudentScalarFieldEnum = {
     id: 'id',
+    name: 'name',
     email: 'email',
     phone: 'phone',
-    userId: 'userId',
+    personalId: 'personalId',
     updatedAt: 'updatedAt',
     createdAt: 'createdAt'
+};
+export const ExpenseScalarFieldEnum = {
+    id: 'id',
+    name: 'name',
+    description: 'description',
+    amount: 'amount',
+    date: 'date',
+    category: 'category',
+    userId: 'userId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
 };
 export const ChargeScalarFieldEnum = {
     id: 'id',
@@ -78,7 +94,8 @@ export const ChargeScalarFieldEnum = {
     status: 'status',
     description: 'description',
     studentId: 'studentId',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
 };
 export const RecurringChargeScalarFieldEnum = {
     id: 'id',
@@ -89,16 +106,53 @@ export const RecurringChargeScalarFieldEnum = {
     studentId: 'studentId',
     createdAt: 'createdAt'
 };
-export const PlanScalarFieldEnum = {
+export const PersonalPlanScalarFieldEnum = {
     id: 'id',
     name: 'name',
-    amount: 'amount'
+    price: 'price',
+    sessionsPerWeek: 'sessionsPerWeek',
+    durationInWeeks: 'durationInWeeks',
+    description: 'description',
+    isActive: 'isActive',
+    personalId: 'personalId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const StudentPlanScalarFieldEnum = {
+    id: 'id',
+    studentId: 'studentId',
+    planId: 'planId',
+    status: 'status',
+    startDate: 'startDate',
+    endDate: 'endDate',
+    priceAtPurchase: 'priceAtPurchase',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+export const SaasPlanScalarFieldEnum = {
+    id: 'id',
+    saasPlanType: 'saasPlanType',
+    name: 'name',
+    price: 'price',
+    StripePriceId: 'StripePriceId',
+    maxStudents: 'maxStudents',
+    maxPlans: 'maxPlans',
+    isActive: 'isActive',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
 };
 export const SubscriptionScalarFieldEnum = {
     id: 'id',
     status: 'status',
     userId: 'userId',
-    planId: 'planId'
+    saasPlanId: 'saasPlanId',
+    stripeSubscriptionId: 'stripeSubscriptionId',
+    stripeCustomerId: 'stripeCustomerId',
+    currentPeriodStart: 'currentPeriodStart',
+    currentPeriodEnd: 'currentPeriodEnd',
+    cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
 };
 export const SortOrder = {
     asc: 'asc',

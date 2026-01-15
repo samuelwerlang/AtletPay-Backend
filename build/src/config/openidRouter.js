@@ -2,10 +2,10 @@ import config from "./config.js";
 const opidRouterConfig = {
     authRequired: false,
     auth0Logout: true,
-    secret: String(config.secret),
+    secret: config.secret,
     baseURL: String(config.baseurl),
-    clientID: String(config.clientId),
-    issuerBaseURL: String(config.issuerBaseUrl)
+    clientID: config.clientId,
+    issuerBaseURL: config.issuerBaseUrl
 };
 export default opidRouterConfig;
 // //auth router attaches /login, /logout, and /callback routes to the baseURL

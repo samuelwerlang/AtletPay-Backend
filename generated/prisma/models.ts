@@ -8,10 +8,13 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/User.ts'
-export type * from './models/Student.ts'
-export type * from './models/Charge.ts'
-export type * from './models/RecurringCharge.ts'
-export type * from './models/Plan.ts'
-export type * from './models/Subscription.ts'
-export type * from './commonInputTypes.ts'
+export type * from './models/User.js'
+export type * from './models/Student.js'
+export type * from './models/Expense.js'
+export type * from './models/Charge.js'
+export type * from './models/RecurringCharge.js'
+export type * from './models/PersonalPlan.js'
+export type * from './models/StudentPlan.js'
+export type * from './models/SaasPlan.js'
+export type * from './models/Subscription.js'
+export type * from './commonInputTypes.js'

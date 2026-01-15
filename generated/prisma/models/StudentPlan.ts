@@ -249,7 +249,7 @@ export type StudentPlanWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"StudentPlan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StudentPlan"> | Date | string
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
-  plan?: Prisma.XOR<Prisma.PersonalPlanScalarRelationFilter, Prisma.PersonalPlanWhereInput>
+  plan?: Prisma.XOR<Prisma.UserPlanScalarRelationFilter, Prisma.UserPlanWhereInput>
 }
 
 export type StudentPlanOrderByWithRelationInput = {
@@ -263,7 +263,7 @@ export type StudentPlanOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   student?: Prisma.StudentOrderByWithRelationInput
-  plan?: Prisma.PersonalPlanOrderByWithRelationInput
+  plan?: Prisma.UserPlanOrderByWithRelationInput
 }
 
 export type StudentPlanWhereUniqueInput = Prisma.AtLeast<{
@@ -280,7 +280,7 @@ export type StudentPlanWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"StudentPlan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StudentPlan"> | Date | string
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
-  plan?: Prisma.XOR<Prisma.PersonalPlanScalarRelationFilter, Prisma.PersonalPlanWhereInput>
+  plan?: Prisma.XOR<Prisma.UserPlanScalarRelationFilter, Prisma.UserPlanWhereInput>
 }, "id">
 
 export type StudentPlanOrderByWithAggregationInput = {
@@ -324,7 +324,7 @@ export type StudentPlanCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   student: Prisma.StudentCreateNestedOneWithoutPlansInput
-  plan: Prisma.PersonalPlanCreateNestedOneWithoutStudentPlansInput
+  plan: Prisma.UserPlanCreateNestedOneWithoutStudentPlansInput
 }
 
 export type StudentPlanUncheckedCreateInput = {
@@ -348,7 +348,7 @@ export type StudentPlanUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.StudentUpdateOneRequiredWithoutPlansNestedInput
-  plan?: Prisma.PersonalPlanUpdateOneRequiredWithoutStudentPlansNestedInput
+  plan?: Prisma.UserPlanUpdateOneRequiredWithoutStudentPlansNestedInput
 }
 
 export type StudentPlanUncheckedUpdateInput = {
@@ -551,7 +551,7 @@ export type StudentPlanCreateWithoutStudentInput = {
   priceAtPurchase: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  plan: Prisma.PersonalPlanCreateNestedOneWithoutStudentPlansInput
+  plan: Prisma.UserPlanCreateNestedOneWithoutStudentPlansInput
 }
 
 export type StudentPlanUncheckedCreateWithoutStudentInput = {
@@ -673,7 +673,7 @@ export type StudentPlanUpdateWithoutStudentInput = {
   priceAtPurchase?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  plan?: Prisma.PersonalPlanUpdateOneRequiredWithoutStudentPlansNestedInput
+  plan?: Prisma.UserPlanUpdateOneRequiredWithoutStudentPlansNestedInput
 }
 
 export type StudentPlanUncheckedUpdateWithoutStudentInput = {
@@ -755,7 +755,7 @@ export type StudentPlanSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdAt?: boolean
   updatedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  plan?: boolean | Prisma.PersonalPlanDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.UserPlanDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentPlan"]>
 
 export type StudentPlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -769,7 +769,7 @@ export type StudentPlanSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   updatedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  plan?: boolean | Prisma.PersonalPlanDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.UserPlanDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentPlan"]>
 
 export type StudentPlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -783,7 +783,7 @@ export type StudentPlanSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   updatedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  plan?: boolean | Prisma.PersonalPlanDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.UserPlanDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studentPlan"]>
 
 export type StudentPlanSelectScalar = {
@@ -801,22 +801,22 @@ export type StudentPlanSelectScalar = {
 export type StudentPlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "planId" | "status" | "startDate" | "endDate" | "priceAtPurchase" | "createdAt" | "updatedAt", ExtArgs["result"]["studentPlan"]>
 export type StudentPlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  plan?: boolean | Prisma.PersonalPlanDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.UserPlanDefaultArgs<ExtArgs>
 }
 export type StudentPlanIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  plan?: boolean | Prisma.PersonalPlanDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.UserPlanDefaultArgs<ExtArgs>
 }
 export type StudentPlanIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  plan?: boolean | Prisma.PersonalPlanDefaultArgs<ExtArgs>
+  plan?: boolean | Prisma.UserPlanDefaultArgs<ExtArgs>
 }
 
 export type $StudentPlanPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StudentPlan"
   objects: {
     student: Prisma.$StudentPayload<ExtArgs>
-    plan: Prisma.$PersonalPlanPayload<ExtArgs>
+    plan: Prisma.$UserPlanPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1223,7 +1223,7 @@ readonly fields: StudentPlanFieldRefs;
 export interface Prisma__StudentPlanClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   student<T extends Prisma.StudentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StudentDefaultArgs<ExtArgs>>): Prisma.Prisma__StudentClient<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  plan<T extends Prisma.PersonalPlanDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PersonalPlanDefaultArgs<ExtArgs>>): Prisma.Prisma__PersonalPlanClient<runtime.Types.Result.GetResult<Prisma.$PersonalPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  plan<T extends Prisma.UserPlanDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserPlanDefaultArgs<ExtArgs>>): Prisma.Prisma__UserPlanClient<runtime.Types.Result.GetResult<Prisma.$UserPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.

@@ -8,7 +8,7 @@
 * 🟢 You can import this file directly.
 */
 export const UserRole = {
-    PERSONAL: 'PERSONAL',
+    USER: 'USER',
     ADMIN: 'ADMIN'
 };
 export const SAAS_PLAN_TYPE = {

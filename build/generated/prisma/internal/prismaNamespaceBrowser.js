@@ -44,7 +44,7 @@ export const ModelName = {
     Expense: 'Expense',
     Charge: 'Charge',
     RecurringCharge: 'RecurringCharge',
-    PersonalPlan: 'PersonalPlan',
+    UserPlan: 'UserPlan',
     StudentPlan: 'StudentPlan',
     SaasPlan: 'SaasPlan',
     Subscription: 'Subscription'
@@ -72,7 +72,7 @@ export const StudentScalarFieldEnum = {
     name: 'name',
     email: 'email',
     phone: 'phone',
-    personalId: 'personalId',
+    userId: 'userId',
     updatedAt: 'updatedAt',
     createdAt: 'createdAt'
 };
@@ -106,7 +106,7 @@ export const RecurringChargeScalarFieldEnum = {
     studentId: 'studentId',
     createdAt: 'createdAt'
 };
-export const PersonalPlanScalarFieldEnum = {
+export const UserPlanScalarFieldEnum = {
     id: 'id',
     name: 'name',
     price: 'price',
@@ -114,7 +114,7 @@ export const PersonalPlanScalarFieldEnum = {
     durationInWeeks: 'durationInWeeks',
     description: 'description',
     isActive: 'isActive',
-    personalId: 'personalId',
+    userId: 'userId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

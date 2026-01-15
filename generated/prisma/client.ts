@@ -65,10 +65,10 @@ export type Charge = Prisma.ChargeModel
  */
 export type RecurringCharge = Prisma.RecurringChargeModel
 /**
- * Model PersonalPlan
+ * Model UserPlan
  * 
  */
-export type PersonalPlan = Prisma.PersonalPlanModel
+export type UserPlan = Prisma.UserPlanModel
 /**
  * Model StudentPlan
  * 

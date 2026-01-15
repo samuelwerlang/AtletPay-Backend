@@ -200,7 +200,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   students?: Prisma.StudentListRelationFilter
   expenses?: Prisma.ExpenseListRelationFilter
-  plans?: Prisma.PersonalPlanListRelationFilter
+  plans?: Prisma.UserPlanListRelationFilter
   subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
 }
 
@@ -214,7 +214,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   students?: Prisma.StudentOrderByRelationAggregateInput
   expenses?: Prisma.ExpenseOrderByRelationAggregateInput
-  plans?: Prisma.PersonalPlanOrderByRelationAggregateInput
+  plans?: Prisma.UserPlanOrderByRelationAggregateInput
   subscription?: Prisma.SubscriptionOrderByWithRelationInput
 }
 
@@ -231,7 +231,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   students?: Prisma.StudentListRelationFilter
   expenses?: Prisma.ExpenseListRelationFilter
-  plans?: Prisma.PersonalPlanListRelationFilter
+  plans?: Prisma.UserPlanListRelationFilter
   subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
 }, "id" | "auth0Id" | "email" | "name">
 
@@ -269,9 +269,9 @@ export type UserCreateInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentCreateNestedManyWithoutUserInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
-  plans?: Prisma.PersonalPlanCreateNestedManyWithoutPersonalInput
+  plans?: Prisma.UserPlanCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
@@ -283,9 +283,9 @@ export type UserUncheckedCreateInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentUncheckedCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutUserInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
-  plans?: Prisma.PersonalPlanUncheckedCreateNestedManyWithoutPersonalInput
+  plans?: Prisma.UserPlanUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -297,9 +297,9 @@ export type UserUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUpdateManyWithoutUserNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PersonalPlanUpdateManyWithoutPersonalNestedInput
+  plans?: Prisma.UserPlanUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
@@ -311,9 +311,9 @@ export type UserUncheckedUpdateInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUncheckedUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutUserNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PersonalPlanUncheckedUpdateManyWithoutPersonalNestedInput
+  plans?: Prisma.UserPlanUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -463,7 +463,7 @@ export type UserCreateWithoutStudentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
-  plans?: Prisma.PersonalPlanCreateNestedManyWithoutPersonalInput
+  plans?: Prisma.UserPlanCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
@@ -476,7 +476,7 @@ export type UserUncheckedCreateWithoutStudentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
-  plans?: Prisma.PersonalPlanUncheckedCreateNestedManyWithoutPersonalInput
+  plans?: Prisma.UserPlanUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -505,7 +505,7 @@ export type UserUpdateWithoutStudentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PersonalPlanUpdateManyWithoutPersonalNestedInput
+  plans?: Prisma.UserPlanUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
@@ -518,7 +518,7 @@ export type UserUncheckedUpdateWithoutStudentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PersonalPlanUncheckedUpdateManyWithoutPersonalNestedInput
+  plans?: Prisma.UserPlanUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -530,8 +530,8 @@ export type UserCreateWithoutExpensesInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentCreateNestedManyWithoutPersonalInput
-  plans?: Prisma.PersonalPlanCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentCreateNestedManyWithoutUserInput
+  plans?: Prisma.UserPlanCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
 
@@ -543,8 +543,8 @@ export type UserUncheckedCreateWithoutExpensesInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentUncheckedCreateNestedManyWithoutPersonalInput
-  plans?: Prisma.PersonalPlanUncheckedCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutUserInput
+  plans?: Prisma.UserPlanUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
 
@@ -572,8 +572,8 @@ export type UserUpdateWithoutExpensesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUpdateManyWithoutPersonalNestedInput
-  plans?: Prisma.PersonalPlanUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUpdateManyWithoutUserNestedInput
+  plans?: Prisma.UserPlanUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
 
@@ -585,8 +585,8 @@ export type UserUncheckedUpdateWithoutExpensesInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUncheckedUpdateManyWithoutPersonalNestedInput
-  plans?: Prisma.PersonalPlanUncheckedUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutUserNestedInput
+  plans?: Prisma.UserPlanUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
 
@@ -598,7 +598,7 @@ export type UserCreateWithoutPlansInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentCreateNestedManyWithoutUserInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutUserInput
 }
@@ -611,7 +611,7 @@ export type UserUncheckedCreateWithoutPlansInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentUncheckedCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutUserInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutUserInput
 }
@@ -640,7 +640,7 @@ export type UserUpdateWithoutPlansInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUpdateManyWithoutUserNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUpdateOneWithoutUserNestedInput
 }
@@ -653,7 +653,7 @@ export type UserUncheckedUpdateWithoutPlansInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUncheckedUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutUserNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutUserNestedInput
 }
@@ -666,9 +666,9 @@ export type UserCreateWithoutSubscriptionInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentCreateNestedManyWithoutUserInput
   expenses?: Prisma.ExpenseCreateNestedManyWithoutUserInput
-  plans?: Prisma.PersonalPlanCreateNestedManyWithoutPersonalInput
+  plans?: Prisma.UserPlanCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubscriptionInput = {
@@ -679,9 +679,9 @@ export type UserUncheckedCreateWithoutSubscriptionInput = {
   role?: $Enums.UserRole
   createdAt?: Date | string
   updatedAt?: Date | string
-  students?: Prisma.StudentUncheckedCreateNestedManyWithoutPersonalInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutUserInput
   expenses?: Prisma.ExpenseUncheckedCreateNestedManyWithoutUserInput
-  plans?: Prisma.PersonalPlanUncheckedCreateNestedManyWithoutPersonalInput
+  plans?: Prisma.UserPlanUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubscriptionInput = {
@@ -708,9 +708,9 @@ export type UserUpdateWithoutSubscriptionInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUpdateManyWithoutUserNestedInput
   expenses?: Prisma.ExpenseUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PersonalPlanUpdateManyWithoutPersonalNestedInput
+  plans?: Prisma.UserPlanUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubscriptionInput = {
@@ -721,9 +721,9 @@ export type UserUncheckedUpdateWithoutSubscriptionInput = {
   role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  students?: Prisma.StudentUncheckedUpdateManyWithoutPersonalNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutUserNestedInput
   expenses?: Prisma.ExpenseUncheckedUpdateManyWithoutUserNestedInput
-  plans?: Prisma.PersonalPlanUncheckedUpdateManyWithoutPersonalNestedInput
+  plans?: Prisma.UserPlanUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -771,7 +771,7 @@ export type UserCountOutputTypeCountExpensesArgs<ExtArgs extends runtime.Types.E
  * UserCountOutputType without action
  */
 export type UserCountOutputTypeCountPlansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.PersonalPlanWhereInput
+  where?: Prisma.UserPlanWhereInput
 }
 
 
@@ -836,7 +836,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     students: Prisma.$StudentPayload<ExtArgs>[]
     expenses: Prisma.$ExpensePayload<ExtArgs>[]
-    plans: Prisma.$PersonalPlanPayload<ExtArgs>[]
+    plans: Prisma.$UserPlanPayload<ExtArgs>[]
     subscription: Prisma.$SubscriptionPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1243,7 +1243,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   students<T extends Prisma.User$studentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   expenses<T extends Prisma.User$expensesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$expensesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExpensePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  plans<T extends Prisma.User$plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PersonalPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  plans<T extends Prisma.User$plansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$plansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subscription<T extends Prisma.User$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$subscriptionArgs<ExtArgs>>): Prisma.Prisma__SubscriptionClient<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1721,23 +1721,23 @@ export type User$expensesArgs<ExtArgs extends runtime.Types.Extensions.InternalA
  */
 export type User$plansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the PersonalPlan
+   * Select specific fields to fetch from the UserPlan
    */
-  select?: Prisma.PersonalPlanSelect<ExtArgs> | null
+  select?: Prisma.UserPlanSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the PersonalPlan
+   * Omit specific fields from the UserPlan
    */
-  omit?: Prisma.PersonalPlanOmit<ExtArgs> | null
+  omit?: Prisma.UserPlanOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.PersonalPlanInclude<ExtArgs> | null
-  where?: Prisma.PersonalPlanWhereInput
-  orderBy?: Prisma.PersonalPlanOrderByWithRelationInput | Prisma.PersonalPlanOrderByWithRelationInput[]
-  cursor?: Prisma.PersonalPlanWhereUniqueInput
+  include?: Prisma.UserPlanInclude<ExtArgs> | null
+  where?: Prisma.UserPlanWhereInput
+  orderBy?: Prisma.UserPlanOrderByWithRelationInput | Prisma.UserPlanOrderByWithRelationInput[]
+  cursor?: Prisma.UserPlanWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.PersonalPlanScalarFieldEnum | Prisma.PersonalPlanScalarFieldEnum[]
+  distinct?: Prisma.UserPlanScalarFieldEnum | Prisma.UserPlanScalarFieldEnum[]
 }
 
 /**

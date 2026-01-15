@@ -56,7 +56,7 @@ export const ModelName = {
   Expense: 'Expense',
   Charge: 'Charge',
   RecurringCharge: 'RecurringCharge',
-  PersonalPlan: 'PersonalPlan',
+  UserPlan: 'UserPlan',
   StudentPlan: 'StudentPlan',
   SaasPlan: 'SaasPlan',
   Subscription: 'Subscription'
@@ -96,7 +96,7 @@ export const StudentScalarFieldEnum = {
   name: 'name',
   email: 'email',
   phone: 'phone',
-  personalId: 'personalId',
+  userId: 'userId',
   updatedAt: 'updatedAt',
   createdAt: 'createdAt'
 } as const
@@ -146,7 +146,7 @@ export const RecurringChargeScalarFieldEnum = {
 export type RecurringChargeScalarFieldEnum = (typeof RecurringChargeScalarFieldEnum)[keyof typeof RecurringChargeScalarFieldEnum]
 
 
-export const PersonalPlanScalarFieldEnum = {
+export const UserPlanScalarFieldEnum = {
   id: 'id',
   name: 'name',
   price: 'price',
@@ -154,12 +154,12 @@ export const PersonalPlanScalarFieldEnum = {
   durationInWeeks: 'durationInWeeks',
   description: 'description',
   isActive: 'isActive',
-  personalId: 'personalId',
+  userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type PersonalPlanScalarFieldEnum = (typeof PersonalPlanScalarFieldEnum)[keyof typeof PersonalPlanScalarFieldEnum]
+export type UserPlanScalarFieldEnum = (typeof UserPlanScalarFieldEnum)[keyof typeof UserPlanScalarFieldEnum]
 
 
 export const StudentPlanScalarFieldEnum = {

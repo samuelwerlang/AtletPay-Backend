@@ -14,7 +14,7 @@ datasource db {
 }
 
 enum UserRole {
-  PERSONAL
+  USER
   ADMIN
 }
 enum SAAS_PLAN_TYPE {
@@ -62,11 +62,11 @@ model User {
   auth0Id String @unique
   email String @unique
   name String? @unique
-  role UserRole @default(PERSONAL)
+  role UserRole @default(USER)
 
   students Student[]
   expenses Expense[]
-  plans PersonalPlan[]
+  plans UserPlan[]
   subscription Subscription?
 
   createdAt DateTime @default(now())
@@ -79,8 +79,8 @@ model Student {
   email String?
   phone String? 
   plans StudentPlan[]
-  personalId String
-  personal User @relation(fields: [personalId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
 
   charges Charge[]
@@ -89,7 +89,7 @@ model Student {
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 
-  @@index([personalId])
+  @@index([userId])
 }
 
 model Expense {
@@ -136,7 +136,7 @@ model RecurringCharge {
   createdAt DateTime @default(now())
 }
 
-model PersonalPlan {
+model UserPlan {
   id String @id @default(uuid())
   name String
   price Int //cents
@@ -145,15 +145,15 @@ model PersonalPlan {
   description String
 
   isActive Boolean @default(true)
-  personalId String
-  personal User @relation(fields: [personalId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   studentPlans StudentPlan[]
 
-  @@index([personalId])
+  @@index([userId])
 }
 
 model StudentPlan {
@@ -163,7 +163,7 @@ model StudentPlan {
   student   Student @relation(fields: [studentId], references: [id])
 
   planId String
-  plan PersonalPlan @relation(fields: [planId], references: [id])
+  plan UserPlan @relation(fields: [planId], references: [id])
 
   status StudentPlanStatus @default(ACTIVE)
 

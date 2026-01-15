@@ -1,22 +1,33 @@
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
-  personalId: string;
+  personalAuth0Id: string;
   name: string;
   phone?: string;
   email?: string;
 }
 
 async function createStudentService(studentInfo: IStudent) {
-  if (!studentInfo.personalId || !studentInfo.name) {
+
+  if (!studentInfo.personalAuth0Id || !studentInfo.name) {
     throw new Error("Missing required student data");
   }
 
+  const personal = await prisma.user.findUnique({
+    where: {
+      auth0Id: studentInfo.personalAuth0Id
+    }
+  });
+
+  if(!personal) {
+    throw new Error("Could not find user (personal)")
+  }
+
   // Verifica aluno duplicado para o MESMO personal
-  if (studentInfo.email) {
+  if(studentInfo.email) {
     const existingStudent = await prisma.student.findFirst({
       where: {
-        personalId: studentInfo.personalId,
+        personalId: studentInfo.personalAuth0Id,
         email: studentInfo.email,
       },
     });
@@ -27,7 +38,12 @@ async function createStudentService(studentInfo: IStudent) {
   }
 
   const createdStudent = await prisma.student.create({
-    data: studentInfo,
+    data: {
+      name: studentInfo.name,
+      email: studentInfo.email,
+      phone: studentInfo.phone,
+      personalId: personal.id,
+    },
   });
 
   return createdStudent;

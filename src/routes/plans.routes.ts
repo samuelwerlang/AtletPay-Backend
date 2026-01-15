@@ -4,7 +4,7 @@ const { requiresAuth } = pkg;
 
 const router = express.Router();
 
-router.post('/plans', 
-    requiresAuth(),
-    createPlanController
-)
+//router.post('/plans', 
+ //   requiresAuth(),
+ //   createPlanController
+//)

@@ -1,7 +1,7 @@
-import createStudentService from "../services/student.services";
+import createStudentService from "../services/student.services.js";
 async function createStudentController(req, res) {
     const { name, phone, email } = req.body;
-    const userPersonalId = req.oidc.user?.sub;
+    const personalAuth0Id = req.oidc.user?.sub;
     if (!req.oidc.user?.sub) {
         return res.status(401).json({ message: "Unauthorized" });
     }
@@ -10,7 +10,7 @@ async function createStudentController(req, res) {
     }
     try {
         const student = await createStudentService({
-            personalId: userPersonalId,
+            personalAuth0Id: personalAuth0Id,
             name,
             phone,
             email,

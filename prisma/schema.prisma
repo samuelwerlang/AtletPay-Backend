@@ -5,8 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -17,7 +16,7 @@ enum UserRole {
   USER
   ADMIN
 }
-enum SAAS_PLAN_TYPE {
+enum SaasPlanType {
   FREE
   BASIC
   PRO 
@@ -181,7 +180,7 @@ model StudentPlan {
 
 model SaasPlan {
   id String @id @default(uuid())
-  saasPlanType SAAS_PLAN_TYPE @unique
+  type SaasPlanType @unique
 
   name String
   price Int //cents

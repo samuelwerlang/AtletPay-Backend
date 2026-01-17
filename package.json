@@ -24,6 +24,7 @@
     "express-oauth2-jwt-bearer": "^1.7.2",
     "express-openid-connect": "^2.19.4",
     "pg": "^8.16.3",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "zod": "^4.3.5"
   }
 }

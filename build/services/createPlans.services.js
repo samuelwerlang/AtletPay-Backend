@@ -1,3 +1,2 @@
-async function createPlanService(planInfo) {
-}
+async function createPlanService(planInfo) { }
 export default createPlanService;

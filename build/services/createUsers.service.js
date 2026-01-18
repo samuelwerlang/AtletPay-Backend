@@ -4,7 +4,7 @@ async function createUserService(userCredentials) {
         throw new Error("Could not reach user credentials");
     }
     const existingUser = await prisma.user.findUnique({
-        where: { auth0Id: userCredentials.auth0Id }
+        where: { auth0Id: userCredentials.auth0Id },
     });
     if (existingUser) {
         return existingUser;

@@ -4,7 +4,7 @@ import { UserRole } from "@prisma/client";
 
 async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   try {
-    const userAuth0Id = req.oidc?.user?.sub;
+    const userAuth0Id = req.auth?.payload.sub;
 
     if (!userAuth0Id) {
       return res.status(401).json({ message: "Unauthenticated" });

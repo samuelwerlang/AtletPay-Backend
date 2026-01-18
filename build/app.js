@@ -1,28 +1,23 @@
-import opidRouterConfig from "./config/openidRouter.js";
-import pkg from "express-openid-connect";
-const { auth, requiresAuth } = pkg;
 import express from "express";
+import { jwtCheck } from "./middlewares/auth.middleware.js";
 import usersRouter from "./routes/users.routes.js";
 import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
-//import { jwtCheck } from './middlewares/auth.middleware.js'
 const app = express();
-//MIDDLEWARES
+// ================= MIDDLEWARES =================
 app.use(express.json());
-app.use(auth(opidRouterConfig));
-app.use("/api", usersRouter, studentsRouter, saasPlansRouter);
-// req.isAuthenticated is provided from the auth router
+// ================= PUBLIC ROUTES =================
 app.get("/", (req, res) => {
-    res.json(req.oidc.isAuthenticated()
-        ? { authStatus: "logged in" }
-        : { authStatus: "logged out" });
+    res.json({ status: "API running 🚀" });
 });
-app.get("/authorized", requiresAuth(), async (req, res) => {
-    res.json({
-        message: "Secured Resource",
-    });
+// ================= PROTECTED ROUTES =================
+app.use("/api", jwtCheck, usersRouter);
+app.use("/api", jwtCheck, studentsRouter);
+app.use("/api", jwtCheck, saasPlansRouter);
+app.get("/authorized", jwtCheck, (req, res) => {
+    res.json({ message: "Secured Resource" });
 });
-app.get("/profile", requiresAuth(), (req, res) => {
-    res.send(JSON.stringify(req.oidc.user, null, 2));
+app.get("/profile", jwtCheck, (req, res) => {
+    res.json(req.auth?.payload);
 });
 export default app;

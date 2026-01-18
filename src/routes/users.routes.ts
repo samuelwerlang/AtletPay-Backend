@@ -1,12 +1,9 @@
-import express from "express"
-import createUserController from "../controllers/users.controller.js"
-import pkg from 'express-openid-connect';
-const { requiresAuth } = pkg;
-const router = express.Router()
+import express from "express";
+import { jwtCheck } from "../middlewares/auth.middleware.js";
+import createUserController from "../controllers/users.controller.js";
 
-router.post("/user",
-    requiresAuth(),
-    createUserController,
-);
+const router = express.Router();
+
+router.post("/user", jwtCheck, createUserController);
 
 export default router;

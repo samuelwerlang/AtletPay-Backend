@@ -8,12 +8,3 @@ const opidRouterConfig = {
     issuerBaseURL: config.issuerBaseUrl
 };
 export default opidRouterConfig;
-// //auth router attaches /login, /logout, and /callback routes to the baseURL
-// app.use(auth(opidRouterConfig));
-// // req.isAuthenticated is provided from the auth router
-// app.get('/', (req, res) => {
-//   res.send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
-// });
-// app.listen(config.PORT, () => {
-//   console.log(`Running on port ${config.PORT}`)
-// })

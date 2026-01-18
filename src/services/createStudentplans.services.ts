@@ -1,8 +1,8 @@
-import {prisma} from "../lib/prisma.js"
+import { prisma } from "../lib/prisma.js";
 
 interface IStundentPlan {
-    planId : string,
-    studentId: string,
-    startDate : number,
-    endDate : number,
+  planId: string;
+  studentId: string;
+  startDate: number;
+  endDate: number;
 }

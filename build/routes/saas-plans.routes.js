@@ -1,8 +1,7 @@
+import { jwtCheck } from "../middlewares/auth.middleware.js";
 import express from "express";
-import pkg from "express-openid-connect";
-const { requiresAuth } = pkg;
 import createSaasPlanController from "../controllers/saasplan.controller.js";
 import requireAdmin from "../middlewares/checkadmin.middleware.js";
 const router = express.Router();
-router.post("/saasplan", requiresAuth(), requireAdmin, createSaasPlanController);
+router.post("/saasplan", jwtCheck, requireAdmin, createSaasPlanController);
 export default router;

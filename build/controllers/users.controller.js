@@ -1,13 +1,15 @@
-import createUserService from "../services/users.service.js";
+import createUserService from "../services/createUsers.service.js";
 async function createUserController(req, res) {
     const user = req.oidc.user;
     if (!user) {
-        return res.status(401).json({ error: "Unauthorized", date: String(Date.now()) });
+        return res
+            .status(401)
+            .json({ error: "Unauthorized", date: String(Date.now()) });
     }
     const createdUser = await createUserService({
         auth0Id: user.sub,
         email: user.email,
-        name: user.name
+        name: user.name,
     });
     return res.status(200).json(createdUser);
 }

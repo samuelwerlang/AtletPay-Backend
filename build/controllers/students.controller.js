@@ -1,19 +1,25 @@
-import createStudentService from "../services/student.services.js";
+import * as z from "zod";
+import createStudentService from "../services/createStudents.services.js";
 async function createStudentController(req, res) {
-    const { name, phone, email } = req.body;
+    const studentSchema = z.object({
+        name: z.string().min(1),
+        phone: z.string().min(9),
+        email: z.string().max(254),
+    });
+    const validatedData = studentSchema.parse(req.body);
     const userAuth0Id = req.oidc.user?.sub;
     if (!req.oidc.user?.sub) {
         return res.status(401).json({ message: "Unauthorized" });
     }
-    if (!name || !email) {
+    if (!validatedData.name || !validatedData.email) {
         return res.status(400).json({ message: "Missing required fields" });
     }
     try {
         const student = await createStudentService({
             userAuth0Id: userAuth0Id,
-            name,
-            phone,
-            email,
+            name: validatedData.name,
+            phone: validatedData.phone,
+            email: validatedData.email,
         });
         res.json(student);
     }

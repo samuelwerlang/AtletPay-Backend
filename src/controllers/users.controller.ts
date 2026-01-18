@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { Request, Response } from "express";
-import createUserService from "../services/users.service.js";
+import createUserService from "../services/createUsers.service.js";
 
 async function createUserController(req: Request, res: Response) {
   const user = req.oidc.user;

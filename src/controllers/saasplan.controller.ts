@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { Request, Response } from "express";
-import createSaasPlanService from "../services/saasplan.services.js";
+import createSaasPlanService from "../services/createSaasplan.services.js";
 import { SaasPlanType } from "@prisma/client";
 
 const createSaasPlanSchema = z.object({

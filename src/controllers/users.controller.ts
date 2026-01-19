@@ -1,46 +1,43 @@
+import * as z from "zod";
 import { Request, Response } from "express";
 import createUserService from "../services/createUsers.service.js";
 
+const userInfoSchema = z.object({
+  sub: z.string().min(1),
+  email: z.email().optional(),
+  email_verified: z.boolean().optional(),
+  name: z.string().min(1).optional(),
+});
+
 async function createUserController(req: Request, res: Response) {
   try {
-    const accessToken = req.headers.authorization?.split(" ")[1];
+    console.log(req.auth?.payload);
+    const parsedUserInfo = userInfoSchema.safeParse(req.auth?.payload);
 
-    if (!accessToken) {
-      return res.status(401).json({ error: "Missing access token" });
-    }
-
-    const userInfoRes = await fetch("https://atletpay.us.auth0.com/userinfo", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Accept: "application/json",
-      },
-    });
-
-    if (!userInfoRes.ok) {
-      const text = await userInfoRes.text();
+    if (!parsedUserInfo.success) {
       return res.status(401).json({
-        error: "Failed to fetch user info from Auth0",
-        details: text,
+        message: "Invalid access token claims",
+        issues: parsedUserInfo.error.issues,
       });
     }
 
-    const userInfo = await userInfoRes.json();
+    const { sub, email, email_verified, name } = parsedUserInfo.data;
 
-    const { sub, email, name } = userInfo;
-
-    if (!sub || !email) {
+    if (!email) {
       return res.status(400).json({
-        error: "Invalid user info returned from Auth0",
+        message: "Email not available in token",
       });
     }
+
+    const displayName = name && name !== email ? name : email.split("@")[0];
 
     const user = await createUserService({
       auth0Id: sub,
       email,
-      name,
+      name: displayName,
     });
 
-    return res.status(200).json(user);
+    return res.status(201).json(user);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal server error" });

@@ -17,6 +17,16 @@ app.use("/api", jwtCheck, saasPlansRouter);
 app.get("/authorized", jwtCheck, (req, res) => {
     res.json({ message: "Secured Resource" });
 });
+app.get("/callback", (req, res) => {
+    res.send(`
+    <h1>Login OK</h1>
+    <p>Copie o access_token da URL</p>
+    <script>
+      const hash = window.location.hash;
+      document.body.innerHTML += "<pre>" + hash + "</pre>";
+    </script>
+  `);
+});
 app.get("/profile", jwtCheck, (req, res) => {
     res.json(req.auth?.payload);
 });

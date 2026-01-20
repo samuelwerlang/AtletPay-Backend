@@ -11,7 +11,6 @@ const userInfoSchema = z.object({
 
 async function createUserController(req: Request, res: Response) {
   try {
-    console.log(req.auth?.payload);
     const parsedUserInfo = userInfoSchema.safeParse(req.auth?.payload);
 
     if (!parsedUserInfo.success) {

@@ -20,14 +20,10 @@ async function createStudentController(req: Request, res: Response) {
   }
 
   const userAuth0Id = req.auth?.payload.sub;
-
-  if (!userAuth0Id) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
   const user = await prisma.user.findUnique({
     where: { id: userAuth0Id },
   });
+
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }

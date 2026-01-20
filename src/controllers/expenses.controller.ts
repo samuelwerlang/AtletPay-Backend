@@ -23,21 +23,14 @@ async function createExpenseController(req: Request, res: Response) {
   }
 
   const userAuth0Id = req.auth?.payload.sub;
-  if (!userAuth0Id) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
 
   const user = await prisma.user.findUnique({
     where: { auth0Id: userAuth0Id },
   });
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
   try {
     const expense = await createExpenseService({
-      userId: user.id,
+      userId: user!.id,
       ...parsedExpense.data,
     });
     return res.status(201).json(expense);

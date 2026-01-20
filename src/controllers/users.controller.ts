@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { Request, Response } from "express";
-import createUserService from "../services/createUsers.service.js";
+import { createUserService } from "../services/users.service.js";
 
 const userInfoSchema = z.object({
   sub: z.string().min(1),

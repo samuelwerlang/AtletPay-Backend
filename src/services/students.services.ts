@@ -1,14 +1,14 @@
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
-  userAuth0Id: string;
+  userId: string;
   name: string;
   phone?: string;
   email?: string;
 }
 
 async function createStudentService(studentInfo: IStudent) {
-  if (!studentInfo.userAuth0Id) {
+  if (!studentInfo.userId) {
     throw new Error("Student must be linked to a user");
   }
 
@@ -17,7 +17,7 @@ async function createStudentService(studentInfo: IStudent) {
   }
 
   const user = await prisma.user.findUnique({
-    where: { auth0Id: studentInfo.userAuth0Id },
+    where: { id: studentInfo.userId },
   });
 
   if (!user) {

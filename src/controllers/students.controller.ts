@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { prisma } from "../lib/prisma.js";
 import { Request, Response } from "express";
 import createStudentService from "../services/createStudents.services.js";
 
@@ -24,9 +25,16 @@ async function createStudentController(req: Request, res: Response) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
+  const user = await prisma.user.findUnique({
+    where: { id: userAuth0Id },
+  });
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
   try {
     const student = await createStudentService({
-      userAuth0Id,
+      userId: user.id,
       ...parseResult.data,
     });
 

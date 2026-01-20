@@ -58,7 +58,7 @@ async function updateUserService(userCredentials: IUserData) {
   });
 }
 
-async function deleteUserService(userCredentials: IUserData) {
+async function deleteUserService(userCredentials: Pick<IUserData, "auth0Id">) {
   const auth0Id = userCredentials?.auth0Id;
 
   if (!auth0Id) {

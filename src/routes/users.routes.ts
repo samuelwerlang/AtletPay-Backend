@@ -1,5 +1,5 @@
 import express from "express";
-import { jwtCheck } from "../middlewares/auth.middleware.js";
+import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import createUserController from "../controllers/users.controller.js";
 
 const router = express.Router();

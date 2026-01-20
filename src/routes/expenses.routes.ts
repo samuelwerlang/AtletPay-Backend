@@ -1,5 +1,5 @@
 import express from "express";
-import { jwtCheck } from "../middlewares/auth.middleware.js";
+import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import createExpenseController from "../controllers/expenses.controller.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
 

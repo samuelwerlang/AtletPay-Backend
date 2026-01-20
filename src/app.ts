@@ -1,5 +1,5 @@
 import express from "express";
-import { jwtCheck } from "./middlewares/auth.middleware.js";
+import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 
 import usersRouter from "./routes/users.routes.js";
 import studentsRouter from "./routes/students.routes.js";

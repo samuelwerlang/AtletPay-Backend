@@ -17,9 +17,9 @@ async function createUserController(req, res) {
             });
         }
         const { sub, email, email_verified, name } = parsedUserInfo.data;
-        if (!email) {
+        if (!email || !sub) {
             return res.status(400).json({
-                message: "Email not available in token",
+                message: "Missing user information in token",
             });
         }
         const displayName = name && name !== email ? name : email.split("@")[0];

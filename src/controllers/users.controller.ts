@@ -23,9 +23,9 @@ async function createUserController(req: Request, res: Response) {
 
     const { sub, email, email_verified, name } = parsedUserInfo.data;
 
-    if (!email) {
+    if (!email || !sub) {
       return res.status(400).json({
-        message: "Email not available in token",
+        message: "Missing user information in token",
       });
     }
 

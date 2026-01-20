@@ -13,14 +13,7 @@ const expenseSchema = z.object({
 });
 
 async function createExpenseController(req: Request, res: Response) {
-  const parsedExpense = expenseSchema.safeParse(req.body);
-
-  if (!parsedExpense.success) {
-    return res.status(400).json({
-      error: "Invalid request body",
-      issues: parsedExpense.error.issues,
-    });
-  }
+  const parsedExpense = expenseSchema.parse(req.body);
 
   const userAuth0Id = req.auth?.payload.sub;
 
@@ -31,7 +24,7 @@ async function createExpenseController(req: Request, res: Response) {
   try {
     const expense = await createExpenseService({
       userId: user!.id,
-      ...parsedExpense.data,
+      ...parsedExpense,
     });
     return res.status(201).json(expense);
   } catch (error: any) {

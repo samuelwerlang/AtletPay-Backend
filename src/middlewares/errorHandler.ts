@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { Request, Response, NextFunction } from "express";
+import { ZodError } from "zod";
 
 export function errorMiddleware(
   err: unknown,
@@ -7,7 +8,7 @@ export function errorMiddleware(
   res: Response,
   next: NextFunction,
 ) {
-  // Erros do Prisma
+  // Prisma Errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     switch (err.code) {
       case "P2025":
@@ -20,15 +21,21 @@ export function errorMiddleware(
         return res.status(400).json({ message: "Invalid relation" });
     }
   }
+  //Zod errors
+  if (err instanceof ZodError) {
+    return res.status(400).json({
+      message: "Validation error",
+      issues: err.issues,
+    });
+  }
 
-  // Erros genéricos
   if (err instanceof Error) {
     return res.status(500).json({
       message: err.message,
     });
   }
 
-  // Fallback extremo
+  // Fallback
   return res.status(500).json({
     message: "Internal server error",
   });

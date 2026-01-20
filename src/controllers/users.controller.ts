@@ -4,43 +4,25 @@ import { getOrCreateUserService } from "../services/users.service.js";
 
 const userInfoSchema = z.object({
   sub: z.string().min(1),
-  email: z.email().optional(),
+  email: z.email(),
   email_verified: z.boolean().optional(),
   name: z.string().min(1).optional(),
 });
 
 async function createUserController(req: Request, res: Response) {
-  try {
-    const parsedUserInfo = userInfoSchema.safeParse(req.auth?.payload);
+  const parsedUserInfo = userInfoSchema.parse(req.auth?.payload);
 
-    if (!parsedUserInfo.success) {
-      return res.status(401).json({
-        message: "Invalid access token claims",
-        issues: parsedUserInfo.error.issues,
-      });
-    }
+  const { sub, email, name } = parsedUserInfo;
 
-    const { sub, email, email_verified, name } = parsedUserInfo.data;
+  const displayName = name && name !== email ? name : email!.split("@")[0];
 
-    if (!email || !sub) {
-      return res.status(400).json({
-        message: "Missing user information in token",
-      });
-    }
+  const user = await getOrCreateUserService({
+    auth0Id: sub,
+    email,
+    name: displayName,
+  });
 
-    const displayName = name && name !== email ? name : email.split("@")[0];
-
-    const user = await getOrCreateUserService({
-      auth0Id: sub,
-      email,
-      name: displayName,
-    });
-
-    return res.status(201).json(user);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
+  return res.status(200).json(user);
 }
 
 export default createUserController;

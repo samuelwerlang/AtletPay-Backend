@@ -21,25 +21,17 @@ async function createExpenseService(expense: IExpense) {
     where: { id: userId },
   });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  try {
-    const newExpense = await prisma.expense.create({
-      data: {
-        userId: user.id,
-        name,
-        description,
-        amount,
-        date,
-        category,
-      },
-    });
-    return newExpense;
-  } catch (error: any) {
-    throw new Error(`Failed to create expense: ${error.message}`);
-  }
+  const newExpense = await prisma.expense.create({
+    data: {
+      userId: user!.id,
+      name,
+      description,
+      amount,
+      date,
+      category,
+    },
+  });
+  return newExpense;
 }
 
 export default createExpenseService;

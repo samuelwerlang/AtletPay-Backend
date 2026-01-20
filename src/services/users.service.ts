@@ -7,12 +7,22 @@ interface IUserData {
 }
 
 async function getOrCreateUserService(userCredentials: IUserData) {
-  if (!userCredentials?.auth0Id) {
-    throw new Error("Auth0 ID is required");
-  }
-
-  return prisma.user.create({
-    data: userCredentials,
+  return prisma.user.upsert({
+    where: { auth0Id: userCredentials.auth0Id },
+    update: {
+      email: userCredentials.email,
+      name: userCredentials.name,
+    },
+    create: {
+      auth0Id: userCredentials.auth0Id,
+      email: userCredentials.email,
+      name: userCredentials.name,
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+    },
   });
 }
 
@@ -25,11 +35,6 @@ async function getUserService(auth0Id: string) {
     where: { auth0Id },
     select: { id: true, email: true, name: true },
   });
-
-  if (!user) {
-    throw new Error("User not found");
-  }
-
   return user;
 }
 

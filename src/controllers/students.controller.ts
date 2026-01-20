@@ -10,35 +10,21 @@ const studentSchema = z.object({
 });
 
 async function createStudentController(req: Request, res: Response) {
-  const parseResult = studentSchema.safeParse(req.body);
+  const parsedResult = studentSchema.parse(req.body);
 
-  if (!parseResult.success) {
-    return res.status(400).json({
-      error: "Invalid request body",
-      issues: parseResult.error.issues,
-    });
-  }
+  const auth0Id = req.auth!.payload.sub;
 
-  const userAuth0Id = req.auth?.payload.sub;
-  const user = await prisma.user.findUnique({
-    where: { id: userAuth0Id },
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { auth0Id },
+    select: { id: true },
   });
 
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
+  const student = await createStudentService({
+    userId: user.id,
+    ...parsedResult,
+  });
 
-  try {
-    const student = await createStudentService({
-      userId: user.id,
-      ...parseResult.data,
-    });
-
-    return res.status(201).json(student);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: "Failed to create student" });
-  }
+  return res.status(201).json(student);
 }
 
 export default createStudentController;

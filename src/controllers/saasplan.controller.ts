@@ -13,32 +13,18 @@ const createSaasPlanSchema = z.object({
 });
 
 async function createSaasPlanController(req: Request, res: Response) {
-  try {
-    const validatedData = createSaasPlanSchema.parse(req.body);
+  const validatedData = createSaasPlanSchema.parse(req.body);
 
-    const saasPlan = await createSaasPlanService({
-      name: validatedData.name,
-      price: validatedData.price,
-      maxPlans: validatedData.maxPlans,
-      maxStudents: validatedData.maxStudents,
-      StripePriceId: validatedData.stripePriceId, // 🔑 mapeamento
-      type: validatedData.type,
-    });
+  const saasPlan = await createSaasPlanService({
+    name: validatedData.name,
+    price: validatedData.price,
+    maxPlans: validatedData.maxPlans,
+    maxStudents: validatedData.maxStudents,
+    StripePriceId: validatedData.stripePriceId, // 🔑 mapeamento
+    type: validatedData.type,
+  });
 
-    return res.status(201).json(saasPlan);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        message: "Validation error",
-        errors: error.issues,
-      });
-    }
-
-    console.error(error);
-    return res.status(500).json({
-      message: "Failed to create saas plan",
-    });
-  }
+  return res.status(201).json(saasPlan);
 }
 
 export default createSaasPlanController;

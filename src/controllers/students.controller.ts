@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { Request, Response } from "express";
-import createStudentService from "../services/students.services.js";
+import { createStudentService } from "../services/students.services.js";
 
 const studentSchema = z.object({
   name: z.string().min(1),

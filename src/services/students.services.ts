@@ -1,3 +1,4 @@
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
@@ -16,29 +17,84 @@ async function createStudentService(studentInfo: IStudent) {
     throw new Error("Student name is required");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: studentInfo.userId },
+  return prisma.student.create({
+    data: {
+      name: studentInfo.name,
+      email: studentInfo.email,
+      phone: studentInfo.phone,
+      userId: studentInfo.userId,
+    },
   });
-
-  if (!user) {
-    throw new Error("Could not find user (personal)");
-  }
-
-  try {
-    return await prisma.student.create({
-      data: {
-        name: studentInfo.name,
-        email: studentInfo.email,
-        phone: studentInfo.phone,
-        userId: user.id,
-      },
-    });
-  } catch (error: any) {
-    if (error.code === "P2002") {
-      throw new Error("Student with this email already exists");
-    }
-    throw error;
-  }
 }
 
-export default createStudentService;
+async function getStudentService(userId: string, studentId: string) {
+  const student = await prisma.student.findFirst({
+    where: {
+      id: studentId,
+      userId,
+    },
+  });
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  return student;
+}
+
+async function updateStudentService(
+  userId: string,
+  studentId: string,
+  data: Pick<IStudent, "name" | "email" | "phone">,
+) {
+  const student = await prisma.student.findFirst({
+    where: { id: studentId, userId },
+  });
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  return prisma.student.update({
+    where: { id: student.id },
+    data: {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+    },
+    select: {
+      name: true,
+      email: true,
+      phone: true,
+    },
+  });
+}
+
+async function deleteStudentService(userId: string, studentId: string) {
+  const student = await prisma.student.findFirst({
+    where: {
+      id: studentId,
+      userId: userId,
+    },
+  });
+
+  if (!student) {
+    throw new Error("Student not found");
+  }
+
+  return prisma.student.delete({
+    where: { id: student.id },
+    select: {
+      name: true,
+      email: true,
+      phone: true,
+    },
+  });
+}
+
+export {
+  createStudentService,
+  getStudentService,
+  updateStudentService,
+  deleteStudentService,
+};

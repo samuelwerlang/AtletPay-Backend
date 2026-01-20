@@ -1,7 +1,7 @@
 import * as z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { Request, Response } from "express";
-import createExpenseService from "../services/createExpenses.services.js";
+import createExpenseService from "../services/expenses.services.js";
 import { EXPENSE_CATEGORY } from "@prisma/client";
 
 const expenseSchema = z.object({

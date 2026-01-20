@@ -1,15 +1,15 @@
 import { prisma } from "../lib/prisma.js";
 
-interface IPlanInfo {
-  name: string;
-  price: number;
-  description: string;
-  durationInWeeks: string;
-  sessionsPerWeek: string;
-  personalId: string;
-  studentPlan: string[];
-}
+// interface IPlanInfo {
+//   name: string;
+//   price: number;
+//   description: string;
+//   durationInWeeks: string;
+//   sessionsPerWeek: string;
+//   personalId: string;
+//   studentPlan: string[];
+// }
 
-async function createPlanService(planInfo: IPlanInfo) {}
+// async function createPlanService(planInfo: IPlanInfo) {}
 
-export default createPlanService;
+// export default createPlanService;

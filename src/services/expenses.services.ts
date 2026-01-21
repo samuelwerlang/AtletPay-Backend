@@ -1,37 +1,75 @@
 import { prisma } from "../lib/prisma.js";
 import { EXPENSE_CATEGORY } from "@prisma/client";
 
-interface IExpense {
+export interface ICreateExpense {
   name: string;
-  description?: string | undefined;
+  description?: string;
   amount: number;
   date: Date;
   category: EXPENSE_CATEGORY;
-  userId: string;
 }
 
-async function createExpenseService(expense: IExpense) {
-  const { name, description, amount, date, category, userId } = expense;
+export interface IUpdateExpense {
+  name?: string;
+  description?: string;
+  amount?: number;
+  date?: Date;
+  category?: EXPENSE_CATEGORY;
+}
 
-  if (!name || !amount || !date || !category || !userId) {
-    throw new Error("Missing required expense fields");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-  });
-
-  const newExpense = await prisma.expense.create({
+async function createExpenseService(data: ICreateExpense, userId: string) {
+  return prisma.expense.create({
     data: {
-      userId: user!.id,
-      name,
-      description,
-      amount,
-      date,
-      category,
+      ...data,
+      userId,
     },
   });
-  return newExpense;
 }
 
-export default createExpenseService;
+async function getAllExpensesService(userId: string) {
+  return prisma.expense.findMany({
+    where: { userId },
+    orderBy: { date: "desc" },
+  });
+}
+
+async function getExpenseByIdService(expenseId: string, userId: string) {
+  return prisma.expense.findFirstOrThrow({
+    where: {
+      id: expenseId,
+      userId,
+    },
+  });
+}
+
+async function updateExpenseService(
+  expenseId: string,
+  data: IUpdateExpense,
+  userId: string,
+) {
+  return prisma.expense.update({
+    where: { id: expenseId },
+    data,
+  });
+}
+
+async function deleteExpenseService(expenseId: string, userId: string) {
+  await prisma.expense.findFirstOrThrow({
+    where: {
+      id: expenseId,
+      userId,
+    },
+  });
+
+  return prisma.expense.delete({
+    where: { id: expenseId },
+  });
+}
+
+export {
+  createExpenseService,
+  getAllExpensesService,
+  getExpenseByIdService,
+  updateExpenseService,
+  deleteExpenseService,
+};

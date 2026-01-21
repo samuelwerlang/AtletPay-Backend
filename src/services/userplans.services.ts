@@ -6,11 +6,10 @@ interface IPlanInfo {
   description: string;
   durationInWeeks: number;
   sessionsPerWeek: number;
-  userId: string;
 }
 
-async function createUserPlanService(planInfo: IPlanInfo) {
-  const { name, price, description, durationInWeeks, sessionsPerWeek, userId } =
+async function createUserPlanService(planInfo: IPlanInfo, userId: string) {
+  const { name, price, description, durationInWeeks, sessionsPerWeek } =
     planInfo;
   return prisma.userPlan.create({
     data: {

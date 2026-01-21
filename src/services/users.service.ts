@@ -6,7 +6,7 @@ interface IUserData {
   name?: string;
 }
 
-async function getOrCreateUserService(userCredentials: IUserData) {
+async function createUserService(userCredentials: IUserData) {
   return prisma.user.upsert({
     where: { auth0Id: userCredentials.auth0Id },
     update: {
@@ -32,7 +32,7 @@ async function getUserService(auth0Id: string) {
   }
 
   const user = await prisma.user.findUnique({
-    where: { auth0Id },
+    where: { auth0Id: auth0Id },
     select: { id: true, email: true, name: true },
   });
   return user;
@@ -75,7 +75,7 @@ async function deleteUserService(userCredentials: Pick<IUserData, "auth0Id">) {
 }
 
 export {
-  getOrCreateUserService,
+  createUserService,
   getUserService,
   updateUserService,
   deleteUserService,

@@ -1,12 +1,21 @@
 import * as z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { Request, Response } from "express";
-import { createStudentService } from "../services/students.services.js";
+import {
+  createStudentService,
+  deleteStudentService,
+  getStudentService,
+  updateStudentService,
+} from "../services/students.services.js";
 
 const studentSchema = z.object({
   name: z.string().min(1),
   phone: z.string().min(9),
   email: z.email(),
+});
+
+const idStudentSchema = z.object({
+  studentId: z.uuid(),
 });
 
 async function createStudentController(req: Request, res: Response) {
@@ -27,4 +36,51 @@ async function createStudentController(req: Request, res: Response) {
   return res.status(201).json(student);
 }
 
-export default createStudentController;
+async function deleteStudentController(req: Request, res: Response) {
+  const { studentId } = idStudentSchema.parse(req.params);
+
+  const auth0Id = req.auth!.payload.sub;
+
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { auth0Id },
+    select: { id: true },
+  });
+
+  const deletedStudent = deleteStudentService(user.id, studentId);
+
+  return res.status(200).json(deletedStudent);
+}
+
+async function updateStudentController(req: Request, res: Response) {
+  const parsedResult = studentSchema.parse(req.body);
+  const { studentId } = idStudentSchema.parse(req.params);
+  const auth0Id = req.auth!.payload.sub;
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { auth0Id },
+    select: { id: true },
+  });
+  const updatedStudent = await updateStudentService(
+    user.id,
+    studentId,
+    parsedResult,
+  );
+  return res.status(200).json(updatedStudent);
+}
+
+async function getStudentController(req: Request, res: Response) {
+  const { studentId } = idStudentSchema.parse(req.params);
+  const auth0Id = req.auth!.payload.sub;
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { auth0Id },
+    select: { id: true },
+  });
+  const student = getStudentService(user.id, studentId);
+  return res.status(200).json(student);
+}
+
+export {
+  createStudentController,
+  getStudentController,
+  deleteStudentController,
+  updateStudentController,
+};

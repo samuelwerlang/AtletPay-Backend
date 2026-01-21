@@ -1,7 +1,7 @@
 import express from "express";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 
-import usersRouter from "./routes/users.routes.js";
+import usersRouter from "./routes/me.routes.js";
 import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";

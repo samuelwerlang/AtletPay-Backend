@@ -1,8 +1,10 @@
 import * as z from "zod";
 import { Request, Response } from "express";
 import {
-  getOrCreateUserService,
+  createUserService,
   deleteUserService,
+  updateUserService,
+  getUserService,
 } from "../services/users.service.js";
 
 const userInfoSchema = z.object({
@@ -13,18 +15,25 @@ const userInfoSchema = z.object({
 });
 
 async function createUserController(req: Request, res: Response) {
-  const parsedUserInfo = userInfoSchema.parse(req.auth?.payload);
+  const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
 
   const { auth0Id, email, name } = parsedUserInfo;
 
   const displayName = name && name !== email ? name : email!.split("@")[0];
 
-  const user = await getOrCreateUserService({
+  const user = await createUserService({
     auth0Id: auth0Id,
     email,
     name: displayName,
   });
 
+  return res.status(200).json(user);
+}
+
+async function getUserController(req: Request, res: Response) {
+  const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
+  const { auth0Id } = parsedUserInfo;
+  const user = getUserService(auth0Id);
   return res.status(200).json(user);
 }
 
@@ -34,4 +43,15 @@ async function deleteUserController(req: Request, res: Response) {
   return res.status(200).json(deletedUser);
 }
 
-export { createUserController, deleteUserController };
+async function updateUserController(req: Request, res: Response) {
+  const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
+  const updatedUser = await updateUserService(parsedUserInfo);
+  return res.status(200).json(updatedUser);
+}
+
+export {
+  createUserController,
+  getUserController,
+  updateUserController,
+  deleteUserController,
+};

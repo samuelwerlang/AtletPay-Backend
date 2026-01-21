@@ -55,7 +55,6 @@ enum EXPENSE_CATEGORY {
   OTHERS
 }
 
-
 model User {
   id  String @id @default(uuid())
   auth0Id String @unique
@@ -79,8 +78,7 @@ model Student {
   phone String? 
   plans StudentPlan[]
   userId String
-  user User @relation(fields: [userId], references: [id])
-
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   charges Charge[]
   recurringCharges RecurringCharge[]
@@ -100,7 +98,7 @@ model Expense {
   category EXPENSE_CATEGORY
 
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate : Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -114,7 +112,7 @@ model Charge {
   description String?
 
   studentId String
-  student Student @relation(fields: [studentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -130,7 +128,7 @@ model RecurringCharge {
   active Boolean @default(true)
 
   studentId String
-  student Student @relation(fields: [studentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
 }
@@ -145,7 +143,7 @@ model UserPlan {
 
   isActive Boolean @default(true)
   userId String
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -159,10 +157,10 @@ model StudentPlan {
   id String @id @default(uuid())
 
   studentId String
-  student   Student @relation(fields: [studentId], references: [id])
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   planId String
-  plan UserPlan @relation(fields: [planId], references: [id])
+  plan UserPlan @relation(fields: [planId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   status StudentPlanStatus @default(ACTIVE)
 
@@ -203,10 +201,10 @@ model Subscription {
   status SubscriptionStatus @default(ACTIVE)
 
   userId String @unique
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   saasPlanId String
-  saasPlan SaasPlan @relation(fields: [saasPlanId], references: [id])
+  saasPlan SaasPlan @relation(fields: [saasPlanId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   stripeSubscriptionId String @unique
   stripeCustomerId String

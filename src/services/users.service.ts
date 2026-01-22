@@ -1,20 +1,20 @@
 import { prisma } from "../lib/prisma.js";
 
 interface IUserData {
-  auth0Id: string;
+  sub: string;
   email: string;
   name?: string;
 }
 
 async function createUserService(userCredentials: IUserData) {
   return prisma.user.upsert({
-    where: { auth0Id: userCredentials.auth0Id },
+    where: { auth0Id: userCredentials.sub },
     update: {
       email: userCredentials.email,
       name: userCredentials.name,
     },
     create: {
-      auth0Id: userCredentials.auth0Id,
+      auth0Id: userCredentials.sub,
       email: userCredentials.email,
       name: userCredentials.name,
     },
@@ -39,7 +39,7 @@ async function getUserService(auth0Id: string) {
 }
 
 async function updateUserService(userCredentials: IUserData) {
-  const auth0Id = userCredentials?.auth0Id;
+  const auth0Id = userCredentials?.sub;
 
   if (!auth0Id) {
     throw new Error("Auth0 ID is required to update user");
@@ -58,8 +58,8 @@ async function updateUserService(userCredentials: IUserData) {
   });
 }
 
-async function deleteUserService(userCredentials: Pick<IUserData, "auth0Id">) {
-  const auth0Id = userCredentials?.auth0Id;
+async function deleteUserService(userCredentials: Pick<IUserData, "sub">) {
+  const auth0Id = userCredentials?.sub;
 
   if (!auth0Id) {
     throw new Error("Auth0 ID is required to delete user");

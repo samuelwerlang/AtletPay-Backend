@@ -14,7 +14,7 @@ app.use(express.json());
 
 // ================= PUBLIC ROUTES =================
 app.get("/", (req, res) => {
-  res.json({ status: "API running 🚀" });
+  res.json({ status: "API running" });
 });
 
 app.get("/callback", (req, res) => {

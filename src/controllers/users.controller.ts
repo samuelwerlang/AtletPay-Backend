@@ -22,7 +22,7 @@ async function createUserController(req: Request, res: Response) {
   const displayName = name && name !== email ? name : email!.split("@")[0];
 
   const user = await createUserService({
-    auth0Id: sub,
+    sub: sub,
     email,
     name: displayName,
   });
@@ -37,21 +37,21 @@ async function getUserController(req: Request, res: Response) {
   return res.status(200).json(user);
 }
 
-// async function deleteUserController(req: Request, res: Response) {
-//   const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
-//   const deletedUser = await deleteUserService(parsedUserInfo);
-//   return res.status(200).json(deletedUser);
-// }
+async function deleteUserController(req: Request, res: Response) {
+  const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
+  const deletedUser = await deleteUserService(parsedUserInfo);
+  return res.status(200).json(deletedUser);
+}
 
-// async function updateUserController(req: Request, res: Response) {
-//   const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
-//   const updatedUser = await updateUserService(parsedUserInfo);
-//   return res.status(200).json(updatedUser);
-// }
+async function updateUserController(req: Request, res: Response) {
+  const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
+  const updatedUser = await updateUserService(parsedUserInfo);
+  return res.status(200).json(updatedUser);
+}
 
 export {
   createUserController,
   getUserController,
-  // updateUserController,
-  // deleteUserController,
+  updateUserController,
+  deleteUserController,
 };

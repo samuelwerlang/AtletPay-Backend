@@ -1,7 +1,12 @@
 import * as z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { Request, Response } from "express";
-import { createExpenseService } from "../services/expenses.services.js";
+import {
+  createExpenseService,
+  deleteExpenseService,
+  getAllExpensesService,
+  getExpenseByIdService,
+} from "../services/expenses.services.js";
 import { EXPENSE_CATEGORY } from "@prisma/client";
 
 const expenseSchema = z.object({
@@ -29,4 +34,40 @@ async function createExpenseController(req: Request, res: Response) {
   return res.status(201).json(expense);
 }
 
-export default createExpenseController;
+async function getAllExpensesController(req: Request, res: Response) {
+  const userAuth0Id = req.auth?.payload.sub;
+  const user = await prisma.user.findUnique({
+    where: { auth0Id: userAuth0Id },
+  });
+  const userExpenses = await getAllExpensesService(user!.id);
+  return res.status(200).json(userExpenses);
+}
+
+async function getExpenseByIdController(req: Request, res: Response) {
+  const userAuth0Id = req.auth?.payload.sub;
+  const expenseId = String(req.params.id); // pegando só o id
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { auth0Id: userAuth0Id },
+  });
+
+  const userExpense = await getExpenseByIdService(expenseId, user.id);
+  return res.status(200).json(userExpense);
+}
+
+async function deleteExpenseController(req: Request, res: Response) {
+  const userAuth0Id = req.auth?.payload.sub;
+  const expenseId = String(req.params.id); // pegando só o id
+  const user = await prisma.user.findUniqueOrThrow({
+    where: { auth0Id: userAuth0Id },
+  });
+
+  const userExpense = await deleteExpenseService(expenseId, user.id);
+  return res.status(200).json(userExpense);
+}
+
+export {
+  createExpenseController,
+  getExpenseByIdController,
+  getAllExpensesController,
+  deleteExpenseController,
+};

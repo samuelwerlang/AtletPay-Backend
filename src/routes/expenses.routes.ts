@@ -6,3 +6,5 @@ import requireAuth from "../middlewares/checkAuth.middleware.js";
 const router = express.Router();
 
 router.post("/expense", jwtCheck, requireAuth, createExpenseController);
+
+export default router;

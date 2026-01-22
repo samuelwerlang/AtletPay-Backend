@@ -37,7 +37,7 @@ async function getExpenseByIdService(expenseId: string, userId: string) {
   return prisma.expense.findFirstOrThrow({
     where: {
       id: expenseId,
-      userId,
+      userId: userId,
     },
   });
 }
@@ -48,7 +48,7 @@ async function updateExpenseService(
   userId: string,
 ) {
   return prisma.expense.update({
-    where: { id: expenseId },
+    where: { id: expenseId, userId: userId },
     data,
   });
 }
@@ -57,7 +57,7 @@ async function deleteExpenseService(expenseId: string, userId: string) {
   await prisma.expense.findFirstOrThrow({
     where: {
       id: expenseId,
-      userId,
+      userId: userId,
     },
   });
 

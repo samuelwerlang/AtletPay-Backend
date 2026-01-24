@@ -29,11 +29,11 @@ app.get("/callback", (req, res) => {
 });
 
 // ================= PROTECTED ROUTES =================
-app.use("/api", jwtCheck, usersRouter);
-app.use("/api", jwtCheck, studentsRouter);
-app.use("/api", jwtCheck, saasPlansRouter);
-app.use("/api", jwtCheck, saasPlansRouter);
-app.use("/api", jwtCheck, expensesRouter);
+app.use("/api", usersRouter);
+app.use("/api", studentsRouter);
+app.use("/api", saasPlansRouter);
+app.use("/api", saasPlansRouter);
+app.use("/api", expensesRouter);
 
 app.get("/authorized", jwtCheck, (req, res) => {
   res.json({ message: "Secured Resource" });

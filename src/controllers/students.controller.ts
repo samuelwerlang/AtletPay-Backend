@@ -46,7 +46,7 @@ async function deleteStudentController(req: Request, res: Response) {
     select: { id: true },
   });
 
-  const deletedStudent = deleteStudentService(user.id, studentId);
+  const deletedStudent = await deleteStudentService(user.id, studentId);
 
   return res.status(200).json(deletedStudent);
 }

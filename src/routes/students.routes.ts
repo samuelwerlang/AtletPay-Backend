@@ -10,8 +10,8 @@ import requireAuth from "../middlewares/checkAuth.middleware.js";
 const router = express.Router();
 
 router.post("/student", jwtCheck, requireAuth, createStudentController);
-router.get("/student/:id", jwtCheck, requireAuth, getStudentController);
-router.delete("/student/:id", jwtCheck, requireAuth, deleteStudentController);
-router.patch("/student/:id", jwtCheck, requireAuth, updateStudentController);
+router.get("/student/:studentId", jwtCheck, requireAuth, getStudentController);
+router.delete("/student/:studentId", jwtCheck, requireAuth, deleteStudentController);
+router.patch("/student/:studentId", jwtCheck, requireAuth, updateStudentController);
 
 export default router;

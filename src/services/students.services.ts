@@ -27,7 +27,15 @@ async function createStudentService(studentInfo: IStudent) {
   });
 }
 
-async function getStudentService(userId: string, studentId: string) {
+async function getAllStudentsService(userId : string) {
+  const students = await prisma.student.findMany({
+    where : { userId },
+    orderBy : { name : "desc"}
+  });
+  return students;
+}
+
+async function getStudentByIdService(userId: string, studentId: string) {
   const student = await prisma.student.findFirst({
     where: {
       id: studentId,
@@ -94,7 +102,8 @@ async function deleteStudentService(userId: string, studentId: string) {
 
 export {
   createStudentService,
-  getStudentService,
+  getStudentByIdService,
+  getAllStudentsService,
   updateStudentService,
   deleteStudentService,
 };

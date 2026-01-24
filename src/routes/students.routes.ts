@@ -3,14 +3,16 @@ import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import {
   createStudentController,
   deleteStudentController,
-  getStudentController,
+  getStudentByIdController,
+  getAllStudentsController,
   updateStudentController,
 } from "../controllers/students.controller.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
 const router = express.Router();
 
 router.post("/student", jwtCheck, requireAuth, createStudentController);
-router.get("/student/:studentId", jwtCheck, requireAuth, getStudentController);
+router.get("/students", jwtCheck, requireAuth, getAllStudentsController);
+router.get("/student/:studentId", jwtCheck, requireAuth, getStudentByIdController);
 router.delete("/student/:studentId", jwtCheck, requireAuth, deleteStudentController);
 router.patch("/student/:studentId", jwtCheck, requireAuth, updateStudentController);
 

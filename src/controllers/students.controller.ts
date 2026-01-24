@@ -4,7 +4,8 @@ import { Request, Response } from "express";
 import {
   createStudentService,
   deleteStudentService,
-  getStudentService,
+  getStudentByIdService,
+  getAllStudentsService,
   updateStudentService,
 } from "../services/students.services.js";
 
@@ -67,20 +68,32 @@ async function updateStudentController(req: Request, res: Response) {
   return res.status(200).json(updatedStudent);
 }
 
-async function getStudentController(req: Request, res: Response) {
+async function getAllStudentsController(req : Request, res : Response) {
+  const auth0Id = req.auth!.payload.sub;
+  const user = await prisma.user.findUnique({
+    where : {
+      auth0Id : auth0Id
+    }
+  })
+  const students = await getAllStudentsService(user!.id);
+  return res.status(200).json(students);
+}
+
+async function getStudentByIdController(req: Request, res: Response) {
   const { studentId } = idStudentSchema.parse(req.params);
   const auth0Id = req.auth!.payload.sub;
   const user = await prisma.user.findUniqueOrThrow({
     where: { auth0Id },
     select: { id: true },
   });
-  const student = getStudentService(user.id, studentId);
+  const student = getStudentByIdService(user.id, studentId);
   return res.status(200).json(student);
 }
 
 export {
   createStudentController,
-  getStudentController,
+  getStudentByIdController,
+  getAllStudentsController,
   deleteStudentController,
   updateStudentController,
 };

@@ -4,26 +4,82 @@ interface IStudentPlan {
   studentId: string;
   planId: string;
   startDate: Date;
-  endDate: Date;
-  priceAtPurchase : number;
+  endDate?: Date;
+  priceAtPurchase: number;
 }
 
-async function createStudentPlanService(studentPlanInfo : IStudentPlan) {
+async function createStudentPlanService(
+  studentPlanInfo: IStudentPlan,
+  userId: string,
+) {
+  const { studentId, planId, startDate, endDate, priceAtPurchase } =
+    studentPlanInfo;
 
-  const {studentId, planId, startDate, endDate, priceAtPurchase} = studentPlanInfo;
-
-  if (startDate > endDate) {
-    throw new Error("Invalid time interval")
+  if (endDate && startDate > endDate) {
+    throw new Error("Invalid time interval");
   }
-  return await prisma.studentPlan.create({
-    data : {
-      studentId,
-      planId,
-      startDate,
-      endDate,
-      priceAtPurchase
-    }});
+
+  // Make sure the student belongs the specified user
+  await prisma.student.findFirstOrThrow({
+    where: {
+      id: studentId,
+      userId,
+    },
+  });
+
+  // Make sure the plan belongs the specified user
+  await prisma.userPlan.findFirstOrThrow({
+    where: {
+      id: planId,
+      userId,
+    },
+  });
+
+  return prisma.$transaction(async (tx) => {
+    const activePlan = await tx.studentPlan.findFirst({
+      where: {
+        studentId,
+        status: "ACTIVE",
+      },
+      select: { id: true },
+    });
+
+    if (activePlan) {
+      throw new Error("Student already has an active plan");
+    }
+    //Creates a new Contract
+    return await tx.studentPlan.create({
+      data: {
+        studentId,
+        planId,
+        startDate,
+        endDate,
+        priceAtPurchase,
+        status: "ACTIVE",
+      },
+    });
+  });
 }
 
+async function cancelStudentPlanService(studentPlanId: string, userId: string) {
+  // Make sure the plan exists, is active and belong to the user
+  const studentPlan = await prisma.studentPlan.findFirstOrThrow({
+    where: {
+      id: studentPlanId,
+      status: "ACTIVE",
+      student: {
+        userId: userId,
+      },
+    },
+  });
 
-export {createStudentPlanService} 
+  return prisma.studentPlan.update({
+    where: { id: studentPlan.id },
+    data: {
+      status: "INACTIVE",
+      endDate: new Date(),
+    },
+  });
+}
+
+export { createStudentPlanService, cancelStudentPlanService };

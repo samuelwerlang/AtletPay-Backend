@@ -40,3 +40,5 @@ export async function checkSaasSubscription(
 
   return next();
 }
+
+export default checkSaasSubscription;

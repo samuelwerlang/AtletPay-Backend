@@ -11,8 +11,8 @@ import {
 
 const studentSchema = z.object({
   name: z.string().min(1),
-  phone: z.string().min(9),
-  email: z.email(),
+  phone: z.string().min(9).optional(),
+  email: z.email().optional(),
 });
 
 const idStudentSchema = z.object({
@@ -68,13 +68,13 @@ async function updateStudentController(req: Request, res: Response) {
   return res.status(200).json(updatedStudent);
 }
 
-async function getAllStudentsController(req : Request, res : Response) {
+async function getAllStudentsController(req: Request, res: Response) {
   const auth0Id = req.auth!.payload.sub;
   const user = await prisma.user.findUnique({
-    where : {
-      auth0Id : auth0Id
-    }
-  })
+    where: {
+      auth0Id: auth0Id,
+    },
+  });
   const students = await getAllStudentsService(user!.id);
   return res.status(200).json(students);
 }
@@ -86,7 +86,7 @@ async function getStudentByIdController(req: Request, res: Response) {
     where: { auth0Id },
     select: { id: true },
   });
-  const student = getStudentByIdService(user.id, studentId);
+  const student = await getStudentByIdService(user.id, studentId);
   return res.status(200).json(student);
 }
 

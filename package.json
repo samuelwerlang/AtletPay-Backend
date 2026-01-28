@@ -5,7 +5,8 @@
   "description": "mvp backend with expressjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx src/server.ts"
   },
   "author": "Samuel Werlang",
   "license": "ISC",
@@ -14,7 +15,6 @@
     "@types/node": "^25.0.5",
     "dotenv": "^17.2.3",
     "prisma": "^7.2.0",
-    "ts-node": "^1.7.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
@@ -23,6 +23,7 @@
     "express": "^5.2.1",
     "express-oauth2-jwt-bearer": "^1.7.2",
     "pg": "^8.16.3",
+    "tsx": "^4.21.0",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"
   }

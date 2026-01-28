@@ -6,6 +6,7 @@ import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
 import expensesRouter from "./routes/expenses.routes.js";
+import userPlansRouter from "./routes/plans.routes.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api", usersRouter);
 app.use("/api", studentsRouter);
 app.use("/api", saasPlansRouter);
 app.use("/api", expensesRouter);
+app.use("/api", userPlansRouter);
 
 app.get("/authorized", jwtCheck, (req, res) => {
   res.json({ message: "Secured Resource" });

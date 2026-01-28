@@ -1,4 +1,3 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
@@ -27,10 +26,10 @@ async function createStudentService(studentInfo: IStudent) {
   });
 }
 
-async function getAllStudentsService(userId : string) {
+async function getAllStudentsService(userId: string) {
   const students = await prisma.student.findMany({
-    where : { userId },
-    orderBy : { name : "desc"}
+    where: { userId },
+    orderBy: { name: "desc" },
   });
   return students;
 }

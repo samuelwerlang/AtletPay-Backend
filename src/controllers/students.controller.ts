@@ -11,8 +11,8 @@ import {
 
 const studentSchema = z.object({
   name: z.string().min(1),
-  phone: z.string().min(9),
-  email: z.email(),
+  phone: z.string().min(9).optional(),
+  email: z.string().email().optional(),
 });
 
 const idStudentSchema = z.object({
@@ -86,7 +86,7 @@ async function getStudentByIdController(req: Request, res: Response) {
     where: { auth0Id },
     select: { id: true },
   });
-  const student = getStudentByIdService(user.id, studentId);
+  const student = await getStudentByIdService(user.id, studentId);
   return res.status(200).json(student);
 }
 

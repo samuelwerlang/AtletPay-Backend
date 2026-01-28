@@ -32,7 +32,6 @@ app.get("/callback", (req, res) => {
 app.use("/api", usersRouter);
 app.use("/api", studentsRouter);
 app.use("/api", saasPlansRouter);
-app.use("/api", saasPlansRouter);
 app.use("/api", expensesRouter);
 
 app.get("/authorized", jwtCheck, (req, res) => {

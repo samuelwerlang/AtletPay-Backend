@@ -4,7 +4,7 @@ const config = {
     DATABASE_URL : process.env.DATABASE_URL || "",
     secret : process.env.SECRET || "",
     audience : process.env.AUDIENCE || "",
-    baseurl : process.env.BASE_URL || 0,
+    baseurl : process.env.BASE_URL || "",
     issuerBaseUrl : process.env.ISSUER_BASE_URL|| "",
     clientId : process.env.CLIENT_ID || "",
 }

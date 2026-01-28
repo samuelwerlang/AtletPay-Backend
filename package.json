@@ -6,7 +6,13 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsx src/server.ts"
+    "start": "node build/server.js",
+    "dev:watch": "tsx watch src/server.ts",
+    "dev": "tsx src/server.ts",
+    "build": "tsc",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "author": "Samuel Werlang",
   "license": "ISC",

@@ -10,14 +10,9 @@ import requireAuth from "../middlewares/checkAuth.middleware.js";
 
 const router = express.Router();
 
-router.delete(
-  "/delete/expense/:id",
-  jwtCheck,
-  requireAuth,
-  deleteExpenseController,
-);
-router.get("/expense", jwtCheck, requireAuth, getAllExpensesController);
-router.get("/expense/:id", jwtCheck, requireAuth, getExpenseByIdController);
 router.post("/expense", jwtCheck, requireAuth, createExpenseController);
+router.get("/expenses", jwtCheck, requireAuth, getAllExpensesController);
+router.get("/expense/:id", jwtCheck, requireAuth, getExpenseByIdController);
+router.delete("/expense/:id", jwtCheck, requireAuth, deleteExpenseController);
 
 export default router;

@@ -75,9 +75,17 @@ async function deleteUserPlanService(planId: string, userId: string) {
   return result;
 }
 
+async function getAllUserPlansService(userId: string) {
+  return prisma.userPlan.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export {
   createUserPlanService,
   getUserPlanService,
   updateUserPlanService,
   deleteUserPlanService,
+  getAllUserPlansService,
 };

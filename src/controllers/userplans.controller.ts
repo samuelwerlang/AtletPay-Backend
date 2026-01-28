@@ -17,8 +17,10 @@ const userPlanSchema = z.object({
   sessionsPerWeek: z.number().int().positive(),
 });
 
+const updateUserPlanSchema = userPlanSchema.partial();
+
 const idPlanSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 async function createUserPlanController(req: Request, res: Response) {
@@ -65,7 +67,7 @@ async function getAllUserPlansController(req: Request, res: Response) {
 }
 
 async function updateUserPlanController(req: Request, res: Response) {
-  const parsedResult = userPlanSchema.parse(req.body);
+  const parsedResult = updateUserPlanSchema.parse(req.body);
   const { id } = idPlanSchema.parse(req.params);
 
   const auth0Id = req.auth!.payload.sub;

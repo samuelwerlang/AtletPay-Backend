@@ -24,25 +24,16 @@ async function createUserPlanService(planInfo: IPlanInfo, userId: string) {
 }
 
 async function updateUserPlanService(
-  planInfo: IPlanInfo,
+  planInfo: Partial<IPlanInfo>,
   userId: string,
   planId: string,
 ) {
-  const { name, price, description, durationInWeeks, sessionsPerWeek } =
-    planInfo;
-
   const updatedUserPlan = await prisma.userPlan.updateMany({
     where: {
       id: planId,
       userId: userId,
     },
-    data: {
-      name,
-      price,
-      description,
-      durationInWeeks,
-      sessionsPerWeek,
-    },
+    data: planInfo,
   });
   if (updatedUserPlan.count === 0) {
     throw new Error("Plan not found or not owned by user");

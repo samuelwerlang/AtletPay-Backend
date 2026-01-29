@@ -21,20 +21,18 @@ const idStudentSchema = z.object({
 
 async function createStudentController(req: Request, res: Response) {
   const parsedResult = studentSchema.parse(req.body);
-  const auth0Id = req.auth!.payload.sub;
   const saasPlan = res.locals.saasPlan;
 
-  const userId =
-    res.locals.user?.id ??
-    (await prisma.user.findUniqueOrThrow({
-      where: { auth0Id },
-      select: { id: true },
-    }));
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   try {
     const student = await createStudentService(
       {
-        userId,
+        userId: user.id,
         name: parsedResult.name,
         phone: parsedResult.phone,
         email: parsedResult.email,
@@ -53,16 +51,14 @@ async function createStudentController(req: Request, res: Response) {
 async function deleteStudentController(req: Request, res: Response) {
   const { studentId } = idStudentSchema.parse(req.params);
 
-  const auth0Id = req.auth!.payload.sub;
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
 
-  const userId =
-    res.locals.user?.id ??
-    (await prisma.user.findUniqueOrThrow({
-      where: { auth0Id },
-      select: { id: true },
-    }));
-
-  const deletedStudent = await deleteStudentService(userId, studentId);
+  const deletedStudent = await deleteStudentService(user.id, studentId);
 
   return res.status(200).json(deletedStudent);
 }
@@ -70,15 +66,14 @@ async function deleteStudentController(req: Request, res: Response) {
 async function updateStudentController(req: Request, res: Response) {
   const parsedResult = studentSchema.parse(req.body);
   const { studentId } = idStudentSchema.parse(req.params);
-  const auth0Id = req.auth!.payload.sub;
-  const userId =
-    res.locals.user?.id ??
-    (await prisma.user.findUniqueOrThrow({
-      where: { auth0Id },
-      select: { id: true },
-    }));
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const updatedStudent = await updateStudentService(
-    userId,
+    user.id,
     studentId,
     parsedResult,
   );
@@ -87,27 +82,25 @@ async function updateStudentController(req: Request, res: Response) {
 }
 
 async function getAllStudentsController(req: Request, res: Response) {
-  const auth0Id = req.auth!.payload.sub;
-  const userId =
-    res.locals.user?.id ??
-    (await prisma.user.findUniqueOrThrow({
-      where: { auth0Id },
-      select: { id: true },
-    }));
-  const students = await getAllStudentsService(userId);
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
+  const students = await getAllStudentsService(user.id);
   return res.status(200).json(students);
 }
 
 async function getStudentByIdController(req: Request, res: Response) {
   const { studentId } = idStudentSchema.parse(req.params);
-  const auth0Id = req.auth!.payload.sub;
-  const userId =
-    res.locals.user?.id ??
-    (await prisma.user.findUniqueOrThrow({
-      where: { auth0Id },
-      select: { id: true },
-    }));
-  const student = await getStudentByIdService(userId, studentId);
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
+  const student = await getStudentByIdService(user.id, studentId);
   return res.status(200).json(student);
 }
 

@@ -24,42 +24,47 @@ const expenseSchema = z.object({
 async function createExpenseController(req: Request, res: Response) {
   const parsedExpense = expenseSchema.parse(req.body);
 
-  const userAuth0Id = req.auth?.payload.sub;
-
-  const user = await prisma.user.findUnique({
-    where: { auth0Id: userAuth0Id },
-  });
-
-  const expense = await createExpenseService(parsedExpense, user!.id);
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
+  const expense = await createExpenseService(parsedExpense, user.id);
   return res.status(201).json(expense);
 }
 
 async function getAllExpensesController(req: Request, res: Response) {
-  const userAuth0Id = req.auth?.payload.sub;
-  const user = await prisma.user.findUnique({
-    where: { auth0Id: userAuth0Id },
-  });
-  const userExpenses = await getAllExpensesService(user!.id);
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
+  const userExpenses = await getAllExpensesService(user.id);
   return res.status(200).json(userExpenses);
 }
 
 async function getExpenseByIdController(req: Request, res: Response) {
-  const userAuth0Id = req.auth?.payload.sub;
   const expenseId = String(req.params.id); // pegando só o id
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id: userAuth0Id },
-  });
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const userExpense = await getExpenseByIdService(expenseId, user.id);
   return res.status(200).json(userExpense);
 }
 
 async function deleteExpenseController(req: Request, res: Response) {
-  const userAuth0Id = req.auth?.payload.sub;
   const expenseId = String(req.params.id); // pegando só o id
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id: userAuth0Id },
-  });
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
 
   const userExpense = await deleteExpenseService(expenseId, user.id);
   return res.status(200).json(userExpense);

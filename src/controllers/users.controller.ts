@@ -33,7 +33,6 @@ async function createUserController(req: Request, res: Response) {
 async function getUserController(req: Request, res: Response) {
   const parsedUserInfo = userInfoSchema.parse(req.auth!.payload);
   const { sub } = parsedUserInfo;
-  console.log(sub);
   const user = await getUserService(sub);
   return res.status(200).json(user);
 }

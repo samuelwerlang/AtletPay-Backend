@@ -7,21 +7,33 @@ interface IStudent {
   email?: string;
 }
 
-async function createStudentService(studentInfo: IStudent) {
-  if (!studentInfo.userId) {
-    throw new Error("Student must be linked to a user");
+type saasPlan = { maxStudents?: number };
+
+async function createStudentService(data: IStudent, saasPlan?: saasPlan) {
+  // Defesa em profundidade: checagem do limite dentro de uma transação
+  if (saasPlan?.maxStudents) {
+    return prisma.$transaction(async (tx) => {
+      const count = await tx.student.count({ where: { userId: data.userId } });
+      if (count >= saasPlan.maxStudents!) {
+        const err: any = new Error("Students limit reached");
+        err.code = "MAX_STUDENTS_REACHED";
+        throw err;
+      }
+
+      const student = await tx.student.create({
+        data: {
+          ...data,
+        },
+      });
+
+      return student;
+    });
   }
 
-  if (!studentInfo.name?.trim()) {
-    throw new Error("Student name is required");
-  }
-
+  // Se não há limite, cria direto
   return prisma.student.create({
     data: {
-      name: studentInfo.name,
-      email: studentInfo.email,
-      phone: studentInfo.phone,
-      userId: studentInfo.userId,
+      ...data,
     },
   });
 }

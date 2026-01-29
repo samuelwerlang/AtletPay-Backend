@@ -17,12 +17,25 @@ async function createSaasPlanService(data: ISaasPlanInfo) {
     throw new Error("Missing required SaasPlan fields");
   }
 
+  console.log("createSaasPlanService input:", {
+    name,
+    price,
+    StripePriceId,
+    type,
+    maxPlans,
+    maxStudents,
+  });
+
   const existingSaasPlan = await prisma.saasPlan.findUnique({
     where: { StripePriceId: data.StripePriceId },
   });
 
   if (existingSaasPlan) {
-    return existingSaasPlan;
+    console.log(
+      "createSaasPlanService: found existing SaasPlan",
+      existingSaasPlan.id,
+    );
+    return { saasPlan: existingSaasPlan, created: false };
   }
 
   const saasPlan = await prisma.saasPlan.create({

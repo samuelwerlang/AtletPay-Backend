@@ -24,7 +24,7 @@ const expenseSchema = z.object({
 async function createExpenseController(req: Request, res: Response) {
   const parsedExpense = expenseSchema.parse(req.body);
 
-  const user = res.locals.user?.id;
+  const user = res.locals.user;
   if (!user?.id) {
     return res
       .status(401)
@@ -35,7 +35,7 @@ async function createExpenseController(req: Request, res: Response) {
 }
 
 async function getAllExpensesController(req: Request, res: Response) {
-  const user = res.locals.user?.id;
+  const user = res.locals.user;
   if (!user?.id) {
     return res
       .status(401)
@@ -47,7 +47,7 @@ async function getAllExpensesController(req: Request, res: Response) {
 
 async function getExpenseByIdController(req: Request, res: Response) {
   const expenseId = String(req.params.id); // pegando só o id
-  const user = res.locals.user?.id;
+  const user = res.locals.user;
   if (!user?.id) {
     return res
       .status(401)
@@ -59,7 +59,7 @@ async function getExpenseByIdController(req: Request, res: Response) {
 
 async function deleteExpenseController(req: Request, res: Response) {
   const expenseId = String(req.params.id); // pegando só o id
-  const user = res.locals.user?.id;
+  const user = res.locals.user;
   if (!user?.id) {
     return res
       .status(401)

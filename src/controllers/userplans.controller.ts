@@ -25,14 +25,12 @@ const idPlanSchema = z.object({
 
 async function createUserPlanController(req: Request, res: Response) {
   const parsedResult = userPlanSchema.parse(req.body);
-
-  const auth0Id = req.auth!.payload.sub;
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id },
-    select: { id: true },
-  });
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const plan = await createUserPlanService(parsedResult, user.id);
 
   return res.status(201).json(plan);
@@ -40,27 +38,24 @@ async function createUserPlanController(req: Request, res: Response) {
 
 async function getUserPlanController(req: Request, res: Response) {
   const { id } = idPlanSchema.parse(req.params);
-
-  const auth0Id = req.auth!.payload.sub;
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id },
-    select: { id: true },
-  });
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const plan = await getUserPlanService(id, user.id);
 
   return res.status(200).json(plan);
 }
 
 async function getAllUserPlansController(req: Request, res: Response) {
-  const auth0Id = req.auth!.payload.sub;
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id },
-    select: { id: true },
-  });
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const plans = await getAllUserPlansService(user.id);
 
   return res.status(200).json(plans);
@@ -69,14 +64,12 @@ async function getAllUserPlansController(req: Request, res: Response) {
 async function updateUserPlanController(req: Request, res: Response) {
   const parsedResult = updateUserPlanSchema.parse(req.body);
   const { id } = idPlanSchema.parse(req.params);
-
-  const auth0Id = req.auth!.payload.sub;
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id },
-    select: { id: true },
-  });
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const updatedPlan = await updateUserPlanService(parsedResult, user.id, id);
 
   return res.status(200).json(updatedPlan);
@@ -84,14 +77,12 @@ async function updateUserPlanController(req: Request, res: Response) {
 
 async function deleteUserPlanController(req: Request, res: Response) {
   const { id } = idPlanSchema.parse(req.params);
-
-  const auth0Id = req.auth!.payload.sub;
-
-  const user = await prisma.user.findUniqueOrThrow({
-    where: { auth0Id },
-    select: { id: true },
-  });
-
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
   const deletedPlan = await deleteUserPlanService(id, user.id);
 
   return res.status(200).json(deletedPlan);

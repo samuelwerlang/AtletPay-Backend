@@ -27,18 +27,21 @@ router.get(
   "/student/:studentId",
   jwtCheck,
   requireAuth,
+  getCurrentUser,
   getStudentByIdController,
 );
 router.delete(
   "/student/:studentId",
   jwtCheck,
   requireAuth,
+  getCurrentUser,
   deleteStudentController,
 );
 router.patch(
   "/student/:studentId",
   jwtCheck,
   requireAuth,
+  getCurrentUser,
   updateStudentController,
 );
 

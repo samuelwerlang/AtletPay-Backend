@@ -5,10 +5,6 @@ import requireAdmin from "../middlewares/checkadmin.middleware.js";
 
 const router = express.Router();
 
-router.post(
-  "/saasplan",
-  jwtCheck, //requireAdmin,
-  createSaasPlanController,
-);
+router.post("/saasplan", jwtCheck, requireAdmin, createSaasPlanController);
 
 export default router;

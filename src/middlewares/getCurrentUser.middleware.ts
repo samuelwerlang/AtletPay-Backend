@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma.js";
 
-export async function currentUser(
+export async function getCurrentUser(
   req: Request,
   res: Response,
   next: NextFunction,
@@ -15,3 +15,5 @@ export async function currentUser(
   res.locals.user = user;
   return next();
 }
+
+export default getCurrentUser;

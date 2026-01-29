@@ -19,8 +19,12 @@ async function checkStudentLimit(
   if (userStudentsCount >= maxStudents) {
     return res.status(403).json({
       message: "Students limit reached",
+      maxStudents: maxStudents,
+      userStudentsCount: userStudentsCount,
     });
   }
 
   return next();
 }
+
+export default checkStudentLimit;

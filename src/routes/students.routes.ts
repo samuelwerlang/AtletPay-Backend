@@ -1,5 +1,4 @@
 import express from "express";
-import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import {
   createStudentController,
   deleteStudentController,
@@ -7,13 +6,40 @@ import {
   getAllStudentsController,
   updateStudentController,
 } from "../controllers/students.controller.js";
+import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
+import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
+import checkSaasSubscription from "../middlewares/checkSaasSubscription.middleware.js";
+import checkStudentLimit from "../middlewares/checkStudentLimit.middleware.js";
 const router = express.Router();
 
-router.post("/student", jwtCheck, requireAuth, createStudentController);
+router.post(
+  "/student",
+  jwtCheck,
+  requireAuth,
+  getCurrentUser,
+  checkSaasSubscription,
+  checkStudentLimit,
+  createStudentController,
+);
 router.get("/students", jwtCheck, requireAuth, getAllStudentsController);
-router.get("/student/:studentId", jwtCheck, requireAuth, getStudentByIdController);
-router.delete("/student/:studentId", jwtCheck, requireAuth, deleteStudentController);
-router.patch("/student/:studentId", jwtCheck, requireAuth, updateStudentController);
+router.get(
+  "/student/:studentId",
+  jwtCheck,
+  requireAuth,
+  getStudentByIdController,
+);
+router.delete(
+  "/student/:studentId",
+  jwtCheck,
+  requireAuth,
+  deleteStudentController,
+);
+router.patch(
+  "/student/:studentId",
+  jwtCheck,
+  requireAuth,
+  updateStudentController,
+);
 
 export default router;

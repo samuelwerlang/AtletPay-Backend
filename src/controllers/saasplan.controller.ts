@@ -8,19 +8,18 @@ const createSaasPlanSchema = z.object({
   price: z.number().positive(),
   maxPlans: z.number().int().positive().optional(),
   maxStudents: z.number().int().positive().optional(),
-  stripePriceId: z.string().min(1),
+  StripePriceId: z.string().min(1),
   type: z.enum(SaasPlanType),
 });
 
 async function createSaasPlanController(req: Request, res: Response) {
   const validatedData = createSaasPlanSchema.parse(req.body);
-
   const saasPlan = await createSaasPlanService({
     name: validatedData.name,
     price: validatedData.price,
     maxPlans: validatedData.maxPlans,
     maxStudents: validatedData.maxStudents,
-    StripePriceId: validatedData.stripePriceId, // 🔑 mapeamento
+    StripePriceId: validatedData.StripePriceId, //Mapping
     type: validatedData.type,
   });
 

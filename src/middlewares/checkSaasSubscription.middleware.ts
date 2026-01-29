@@ -6,29 +6,30 @@ export async function checkSaasSubscription(
   res: Response,
   next: NextFunction,
 ) {
-  const userAuth0Id = req.auth?.payload.sub;
-
-  if (!userAuth0Id) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
+  const userId = res.locals.user.id;
   const subscription = await prisma.subscription.findFirst({
     where: {
       user: {
-        auth0Id: userAuth0Id,
+        id: userId,
       },
     },
     include: {
       saasPlan: true,
     },
   });
-
   if (!subscription) {
     return res.status(403).json({ message: "No subscription found" });
   }
 
-  if (subscription.status !== "ACTIVE") {
-    return res.status(403).json({ message: "Subscription inactive" });
+  switch (subscription.status) {
+    case "CANCELED":
+      return res.status(403).json({ message: "Subscription canceled" });
+    case "INCOMPLETE":
+      return res.status(403).json({ message: "Subscription incomplete" });
+    case "PAST_DUE":
+      return res.status(403).json({ message: "Subscription past-due" });
+    default:
+      break;
   }
 
   if (subscription.currentPeriodEnd <= new Date()) {

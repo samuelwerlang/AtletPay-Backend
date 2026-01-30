@@ -8,9 +8,9 @@ import {
 const studenPlanSchema = z.object({
   studentId: z.uuid(),
   planId: z.uuid(),
-  startDate: z.date(),
-  endDate: z.date().optional(),
-  priceAtPurchase: z.int().positive(),
+  //   startDate: z.date(),
+  //   endDate: z.date().optional(),
+  //   priceAtPurchase: z.int().positive(),
 });
 
 const idStudentPlan = z.object({
@@ -30,7 +30,7 @@ async function createStudentPlanController(req: Request, res: Response) {
 }
 
 async function cancelStudentPlanController(req: Request, res: Response) {
-  const validatedStudentPlanId = idStudentPlan.parse(req.params);
+  const validatedOutput = idStudentPlan.parse(req.params);
   const user = res.locals.user;
   if (!user?.id) {
     return res
@@ -38,7 +38,7 @@ async function cancelStudentPlanController(req: Request, res: Response) {
       .json({ message: "User not loaded in request context" });
   }
   const canceledStudentPlan = await cancelStudentPlanService(
-    String(validatedStudentPlanId),
+    validatedOutput.studentPlanId,
     user!.id,
   );
   return res.status(200).json(canceledStudentPlan);

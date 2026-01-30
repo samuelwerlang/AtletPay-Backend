@@ -3,21 +3,16 @@ import { prisma } from "../lib/prisma.js";
 interface IStudentPlan {
   studentId: string;
   planId: string;
-  startDate: Date;
-  endDate?: Date;
-  priceAtPurchase: number;
+  // startDate: Date;
+  // endDate?: Date;
+  // priceAtPurchase: number;
 }
 
 async function createStudentPlanService(
   studentPlanInfo: IStudentPlan,
   userId: string,
 ) {
-  const { studentId, planId, startDate, endDate, priceAtPurchase } =
-    studentPlanInfo;
-
-  if (endDate && startDate > endDate) {
-    throw new Error("Invalid time interval");
-  }
+  const { studentId, planId } = studentPlanInfo;
 
   // Make sure the student belongs the specified user
   await prisma.student.findFirstOrThrow({
@@ -35,6 +30,7 @@ async function createStudentPlanService(
     },
     select: {
       durationInWeeks: true,
+      price: true,
     },
   });
 
@@ -43,6 +39,9 @@ async function createStudentPlanService(
   const durationInDays = userPlan.durationInWeeks * 7;
   const studentPlanEndDate = new Date(currentDate);
   studentPlanEndDate.setDate(studentPlanEndDate.getDate() + durationInDays);
+  if (studentPlanEndDate && currentDate > studentPlanEndDate) {
+    throw new Error("Invalid time interval");
+  }
 
   return prisma.$transaction(async (tx) => {
     const activePlan = await tx.studentPlan.findFirst({
@@ -63,7 +62,7 @@ async function createStudentPlanService(
         planId,
         startDate: currentDate,
         endDate: studentPlanEndDate,
-        priceAtPurchase,
+        priceAtPurchase: userPlan.price,
         status: "ACTIVE",
       },
     });

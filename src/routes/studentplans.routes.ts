@@ -27,3 +27,5 @@ router.patch(
   checkSaasSubscription,
   cancelStudentPlanController,
 );
+
+export default router;

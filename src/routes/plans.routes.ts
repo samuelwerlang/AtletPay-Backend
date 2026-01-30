@@ -1,5 +1,7 @@
 import express from "express";
 import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
+import checkSaasSubscription from "../middlewares/checkSaasSubscription.middleware.js";
+import checkPlanLimit from "../middlewares/checkPlanLimit.middleware.js";
 import {
   createUserPlanController,
   getUserPlanController,
@@ -17,6 +19,8 @@ router.post(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
+  checkPlanLimit,
   createUserPlanController,
 );
 router.get(

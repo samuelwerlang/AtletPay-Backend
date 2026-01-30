@@ -28,12 +28,21 @@ async function createStudentPlanService(
   });
 
   // Make sure the plan belongs the specified user
-  await prisma.userPlan.findFirstOrThrow({
+  const userPlan = await prisma.userPlan.findFirstOrThrow({
     where: {
       id: planId,
       userId,
     },
+    select: {
+      durationInWeeks: true,
+    },
   });
+
+  //Calculate the End Date Based on userPlan duration in Weeks
+  const currentDate = new Date();
+  const durationInDays = userPlan.durationInWeeks * 7;
+  const studentPlanEndDate = new Date(currentDate);
+  studentPlanEndDate.setDate(studentPlanEndDate.getDate() + durationInDays);
 
   return prisma.$transaction(async (tx) => {
     const activePlan = await tx.studentPlan.findFirst({
@@ -52,8 +61,8 @@ async function createStudentPlanService(
       data: {
         studentId,
         planId,
-        startDate,
-        endDate,
+        startDate: currentDate,
+        endDate: studentPlanEndDate,
         priceAtPurchase,
         status: "ACTIVE",
       },

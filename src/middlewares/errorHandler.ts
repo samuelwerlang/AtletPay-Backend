@@ -29,6 +29,7 @@ export function errorMiddleware(
     });
   }
 
+  //Default Errors
   if (err instanceof Error) {
     return res.status(500).json({
       message: err.message,

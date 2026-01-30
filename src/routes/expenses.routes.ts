@@ -11,14 +11,9 @@ import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
 
 const router = express.Router();
 
-router.delete(
-  "/delete/expense/:id",
-  jwtCheck,
-  requireAuth,
-  deleteExpenseController,
-);
+router.delete("/expense/:id", jwtCheck, requireAuth, deleteExpenseController);
 router.get(
-  "/expense",
+  "/expenses",
   jwtCheck,
   requireAuth,
   getCurrentUser,

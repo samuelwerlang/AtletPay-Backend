@@ -35,11 +35,11 @@ async function createStudentPlanService(
   });
 
   //Calculate the End Date Based on userPlan duration in Weeks
-  const currentDate = new Date();
+  const now = new Date();
   const durationInDays = userPlan.durationInWeeks * 7;
-  const studentPlanEndDate = new Date(currentDate);
+  const studentPlanEndDate = new Date(now);
   studentPlanEndDate.setDate(studentPlanEndDate.getDate() + durationInDays);
-  if (studentPlanEndDate && currentDate > studentPlanEndDate) {
+  if (studentPlanEndDate && now > studentPlanEndDate) {
     throw new Error("Invalid time interval");
   }
 
@@ -60,7 +60,7 @@ async function createStudentPlanService(
       data: {
         studentId,
         planId,
-        startDate: currentDate,
+        startDate: now,
         endDate: studentPlanEndDate,
         priceAtPurchase: userPlan.price,
         status: "ACTIVE",

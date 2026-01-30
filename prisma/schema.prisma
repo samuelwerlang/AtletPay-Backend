@@ -28,11 +28,8 @@ model Student {
   createdAt        DateTime          @default(now())
   name             String
   userId           String
-  charges          Charge[]
-  recurringCharges RecurringCharge[]
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   plans            StudentPlan[]
-
   @@index([userId])
 }
 
@@ -50,28 +47,48 @@ model Expense {
 }
 
 model Charge {
-  id          String       @id @default(uuid())
-  amount      Int
-  dueDate     DateTime
-  status      ChargeStatus
-  description String?
-  studentId   String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  id             String        @id @default(uuid())
+  amount         Int           // em centavos (minor units)
+  currency       String        @default("BRL")
+  dueDate        DateTime
+  status         ChargeStatus  @default(PENDING)
+  description    String?
+  studentPlanId  String
+  // denormalizado para facilitar filtros:
+  studentId      String
+  externalId     String?       // id do gateway (Stripe, etc.)
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
+  studentPlan    StudentPlan   @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
+
+  @@index([studentPlanId])
   @@index([studentId])
+  @@unique([studentPlanId, dueDate])
 }
 
 model RecurringCharge {
-  id        String          @id @default(uuid())
-  amount    Int
-  interval  BillingInterval
-  startDate DateTime
-  active    Boolean         @default(true)
-  studentId String
-  createdAt DateTime        @default(now())
-  student   Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  id             String           @id @default(uuid())
+  amount         Int              // em centavos (minor units)
+  currency       String           @default("BRL")
+  interval       BillingInterval  @default(MONTHLY)
+  startDate      DateTime         // início da recorrência
+  nextRunAt      DateTime         // próxima geração de cobrança
+  lastRunAt      DateTime?        // última execução
+  anchorDayOfMonth Int?           // opcional: para ciclos mensais (ex.: dia 15)
+  status         RecurringStatus  @default(ACTIVE)
+
+  studentPlanId  String
+  studentId      String           // denormalizado para filtros
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  studentPlan    StudentPlan      @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
+
+  @@index([studentPlanId])
+  @@index([studentId])
 }
 
 model UserPlan {
@@ -86,6 +103,7 @@ model UserPlan {
   updatedAt       DateTime      @updatedAt
   userId          String
   studentPlans    StudentPlan[]
+
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -99,6 +117,8 @@ model StudentPlan {
   startDate       DateTime          @default(now())
   endDate         DateTime?
   priceAtPurchase Int
+  charges         Charge[]
+  recurringCharges RecurringCharge[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   plan            UserPlan          @relation(fields: [planId], references: [id], onDelete: Cascade)
@@ -165,6 +185,12 @@ enum ChargeStatus {
 enum BillingInterval {
   MONTHLY
   WEEKLY
+}
+
+enum RecurringStatus {
+  ACTIVE
+  PAUSED
+  CANCELED
 }
 
 enum SubscriptionStatus {

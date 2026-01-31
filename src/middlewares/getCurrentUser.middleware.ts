@@ -11,6 +11,7 @@ export async function getCurrentUser(
   const user = await prisma.user.findUniqueOrThrow({
     where: { auth0Id },
   });
+  
   res.locals.user = user;
   return next();
 }

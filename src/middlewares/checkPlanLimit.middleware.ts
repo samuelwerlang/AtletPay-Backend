@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import { Request, Response, NextFunction } from "express";
 
 async function checkPlanLimit(req: Request, res: Response, next: NextFunction) {
-  const { maxPlans } = res.locals.maxPlans;
+  const { maxPlans } = res.locals.saasPlan;
   const userMaxPlansCount = await prisma.userPlan.count({
     where: {
       userId: res.locals.user!.id,

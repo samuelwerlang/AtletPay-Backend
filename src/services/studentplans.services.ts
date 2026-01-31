@@ -3,21 +3,16 @@ import { prisma } from "../lib/prisma.js";
 interface IStudentPlan {
   studentId: string;
   planId: string;
-  startDate: Date;
-  endDate?: Date;
-  priceAtPurchase: number;
+  // startDate: Date;
+  // endDate?: Date;
+  // priceAtPurchase: number;
 }
 
 async function createStudentPlanService(
   studentPlanInfo: IStudentPlan,
   userId: string,
 ) {
-  const { studentId, planId, startDate, endDate, priceAtPurchase } =
-    studentPlanInfo;
-
-  if (endDate && startDate > endDate) {
-    throw new Error("Invalid time interval");
-  }
+  const { studentId, planId } = studentPlanInfo;
 
   // Make sure the student belongs the specified user
   await prisma.student.findFirstOrThrow({
@@ -28,12 +23,25 @@ async function createStudentPlanService(
   });
 
   // Make sure the plan belongs the specified user
-  await prisma.userPlan.findFirstOrThrow({
+  const userPlan = await prisma.userPlan.findFirstOrThrow({
     where: {
       id: planId,
       userId,
     },
+    select: {
+      durationInWeeks: true,
+      price: true,
+    },
   });
+
+  //Calculate the End Date Based on userPlan duration in Weeks
+  const now = new Date();
+  const durationInDays = userPlan.durationInWeeks * 7;
+  const studentPlanEndDate = new Date(now);
+  studentPlanEndDate.setDate(studentPlanEndDate.getDate() + durationInDays);
+  if (studentPlanEndDate && now > studentPlanEndDate) {
+    throw new Error("Invalid time interval");
+  }
 
   return prisma.$transaction(async (tx) => {
     const activePlan = await tx.studentPlan.findFirst({
@@ -52,9 +60,9 @@ async function createStudentPlanService(
       data: {
         studentId,
         planId,
-        startDate,
-        endDate,
-        priceAtPurchase,
+        startDate: now,
+        endDate: studentPlanEndDate,
+        priceAtPurchase: userPlan.price,
         status: "ACTIVE",
       },
     });

@@ -1,5 +1,5 @@
-import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import express from "express";
+import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import createSaasPlanController from "../controllers/saasplan.controller.js";
 import requireAdmin from "../middlewares/checkadmin.middleware.js";
 

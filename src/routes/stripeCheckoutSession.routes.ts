@@ -8,23 +8,26 @@ import requireAuth from "../middlewares/checkAuth.middleware.js";
 const router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);
 
-router.post(
-  "/stripe-checkout-session",
-  jwtCheck,
-  requireAuth,
-  async (req: Request, res: Response) => {
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
-          // Provide the exact Price ID (for example, price_1234) of the product you want to sell
-          price: "{{PRICE_ID}}",
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      success_url: `${process.env.BASE_URL}?success=true`,
-    });
+router.post("/create-checkout-session", async (req, res) => {
+  const prices = await stripe.prices.list({
+    lookup_keys: [req.body.lookup_key],
+    expand: ["data.product"],
+  });
+  const session = await stripe.checkout.sessions.create({
+    billing_address_collection: "auto",
+    line_items: [
+      {
+        price: prices.data[0].id,
+        // For usage-based billing, don't pass quantity
+        quantity: 1,
+      },
+    ],
+    mode: "subscription",
+    locale: "pt-BR",
+    success_url: `${config.baseurl}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
+  });
 
-    res.redirect(303, session!.url!);
-  },
-);
+  res.redirect(303, session!.url!);
+});
+
+export default router;

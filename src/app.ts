@@ -9,6 +9,9 @@ import expensesRouter from "./routes/expenses.routes.js";
 import userPlansRouter from "./routes/plans.routes.js";
 import studentPlansRouter from "./routes/studentplans.routes.js";
 
+import createCheckoutSession from "./routes/stripeCheckoutSession.routes.js";
+import createPortalSession from "./routes/stripePortalSession.routes.js";
+
 const app = express();
 
 // ================= MIDDLEWARES =================
@@ -37,6 +40,8 @@ app.use("/api", saasPlansRouter);
 app.use("/api", expensesRouter);
 app.use("/api", userPlansRouter);
 app.use("/api", studentPlansRouter);
+app.use("/api", createCheckoutSession);
+app.use("/api", createPortalSession);
 
 app.get("/authorized", jwtCheck, (req, res) => {
   res.json({ message: "Secured Resource" });

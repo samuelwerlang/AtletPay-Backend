@@ -13,6 +13,7 @@ model User {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   auth0Id      String        @unique
+  stripeCustomerId String?   @unique
   name         String?       @unique
   expenses     Expense[]
   students     Student[]
@@ -198,6 +199,8 @@ enum SubscriptionStatus {
   CANCELED
   PAST_DUE
   INCOMPLETE
+  UNPAID
+  TRIALING
 }
 
 enum EXPENSE_CATEGORY {

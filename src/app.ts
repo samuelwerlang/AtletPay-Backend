@@ -1,7 +1,7 @@
 import express from "express";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
-
+import stripeWebhook from "./routes/stripeWebhook.routes.js";
 import usersRouter from "./routes/me.routes.js";
 import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
@@ -14,6 +14,8 @@ import createPortalSession from "./routes/stripePortalSession.routes.js";
 
 const app = express();
 
+// ================ WEBHOOKS ================
+app.use("/api", stripeWebhook);
 // ================= MIDDLEWARES =================
 app.use(express.json());
 

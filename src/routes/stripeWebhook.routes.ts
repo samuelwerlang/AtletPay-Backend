@@ -11,12 +11,12 @@ import {
 } from "../services/subscriptions.services.js";
 
 // --Utils--
-import { mapStripeStatusToPrisma } from "../utils/statusMap.js";
-//import { getSubscriptionPeriod } from "../utils/getSubscriptionPeriod.js";
 import {
-  getUserBasedOnCustomerId,
-  getSaasPlanBasedOnPriceId,
-  getSubscriptionPeriod,
+  // getUserBasedOnCustomerId,
+  // getSaasPlanBasedOnPriceId,
+  // getSubscriptionPeriod,
+  mapStripeStatusToPrisma,
+  handleSubscriptionEvent,
 } from "../utils/stripeWebhookHandlers.js";
 import { SubscriptionStatus } from "@prisma/client";
 
@@ -72,104 +72,21 @@ router.post(
 
           break;
         }
-        case "customer.subscription.created": {
-          const sub = event.data.object as Stripe.Subscription;
-          const stripeCustomerId =
-            typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-          const priceId = sub.items?.data?.[0]?.price?.id;
-          const user = await getUserBasedOnCustomerId(stripeCustomerId);
-          const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
-          const { currentPeriodStart, currentPeriodEnd } =
-            await getSubscriptionPeriod(sub);
-          if (!stripeCustomerId) {
-            console.warn("Missing stripe customerId");
-            break;
-          }
-          if (!priceId) {
-            console.warn("Missing PriceId in subscription");
-            break;
-          }
-          if (!user) {
-            break;
-          }
-          if (!saasPlan) {
-            break;
-          }
-          await createSubscriptionService({
-            userId: user!.id,
-            saasPlanId: saasPlan.id,
-            stripeCustomerId:
-              typeof sub.customer === "string" ? sub.customer : sub.customer.id,
-            stripeSubscriptionId: sub.id,
-            status: mapStripeStatusToPrisma(sub.status),
-            cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
-            currentPeriodStart,
-            currentPeriodEnd,
-          });
-          break;
-        }
-        case "customer.subscription.updated": {
-          const sub = event.data.object as Stripe.Subscription;
-          const stripeCustomerId =
-            typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-          const priceId = sub.items?.data?.[0]?.price?.id;
-          const user = await getUserBasedOnCustomerId(stripeCustomerId);
-          const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
-          const { currentPeriodStart, currentPeriodEnd } =
-            await getSubscriptionPeriod(sub);
-
-          if (!user) break;
-          if (!priceId || !saasPlan) break;
-
-          await updateSubscriptionService(
-            {
-              userId: user.id,
-              saasPlanId: saasPlan.id,
-              stripeCustomerId,
-              stripeSubscriptionId: sub.id,
-              status: mapStripeStatusToPrisma(sub.status),
-              cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
-              currentPeriodStart,
-              currentPeriodEnd,
-            },
-            user.id,
-          );
-          console.log(
-            `Subscription updated for user ${user.id} | stripeSubscriptionId: ${sub.id}`,
+        case "customer.subscription.created":
+          await handleSubscriptionEvent(
+            event.data.object as Stripe.Subscription,
+            "create",
           );
           break;
-        }
-        case "customer.subscription.deleted": {
-          const sub = event.data.object as Stripe.Subscription;
-          const stripeCustomerId =
-            typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-          const priceId = sub.items?.data?.[0]?.price?.id;
-          const user = await getUserBasedOnCustomerId(stripeCustomerId);
-          const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
-          const { currentPeriodStart, currentPeriodEnd } =
-            await getSubscriptionPeriod(sub);
 
-          if (!user) break;
-          if (!priceId || !saasPlan) break;
-
-          await updateSubscriptionService(
-            {
-              userId: user.id,
-              saasPlanId: saasPlan.id,
-              stripeCustomerId,
-              stripeSubscriptionId: sub.id,
-              status: SubscriptionStatus.CANCELED,
-              cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
-              currentPeriodStart,
-              currentPeriodEnd,
-            },
-            user.id,
-          );
-          console.log(
-            `Subscription canceled for user ${user.id} | stripeSubscriptionId: ${sub.id}`,
+        // --- Works for both cases ---
+        case "customer.subscription.updated":
+        case "customer.subscription.deleted":
+          await handleSubscriptionEvent(
+            event.data.object as Stripe.Subscription,
+            "update",
           );
           break;
-        }
         default:
           console.error("Unhandled event type:", event.type);
           break;

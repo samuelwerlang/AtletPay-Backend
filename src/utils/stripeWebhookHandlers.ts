@@ -1,4 +1,30 @@
+import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
+import { SubscriptionStatus } from "@prisma/client";
+
+import {
+  createSubscriptionService,
+  updateSubscriptionService,
+} from "../services/subscriptions.services.js";
+
+function mapStripeStatusToPrisma(status: Stripe.Subscription.Status) {
+  switch (status) {
+    case "active":
+      return SubscriptionStatus.ACTIVE;
+    case "incomplete":
+      return SubscriptionStatus.INCOMPLETE;
+    case "past_due":
+      return SubscriptionStatus.PAST_DUE;
+    case "canceled":
+      return SubscriptionStatus.CANCELED;
+    case "unpaid":
+      return SubscriptionStatus.UNPAID;
+    case "trialing":
+      return SubscriptionStatus.TRIALING;
+    default:
+      return SubscriptionStatus.INCOMPLETE;
+  }
+}
 
 const getUserBasedOnCustomerId = async (stripeCustomerId: string) => {
   const user = await prisma.user.findFirst({
@@ -41,8 +67,47 @@ async function getSubscriptionPeriod(sub: any) {
   };
 }
 
+// --- Global Handler for Subscriptions ---
+async function handleSubscriptionEvent(
+  sub: Stripe.Subscription,
+  service: "create" | "update",
+) {
+  const stripeCustomerId =
+    typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+  const priceId = sub.items?.data?.[0]?.price?.id;
+  const user = await getUserBasedOnCustomerId(stripeCustomerId);
+  const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
+  const { currentPeriodStart, currentPeriodEnd } =
+    await getSubscriptionPeriod(sub);
+
+  if (!user || !priceId || !saasPlan || !stripeCustomerId) return;
+
+  const subscriptionData = {
+    userId: user.id,
+    saasPlanId: saasPlan.id,
+    stripeCustomerId,
+    stripeSubscriptionId: sub.id,
+    status: mapStripeStatusToPrisma(sub.status),
+    cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
+    currentPeriodStart,
+    currentPeriodEnd,
+  };
+
+  if (service === "create") {
+    await createSubscriptionService(subscriptionData);
+  } else {
+    await updateSubscriptionService(subscriptionData, user.id);
+  }
+
+  console.log(
+    `Subscription ${service}d for user ${user.id} | stripeSubscriptionId: ${sub.id}`,
+  );
+}
+
 export {
+  mapStripeStatusToPrisma,
   getUserBasedOnCustomerId,
   getSaasPlanBasedOnPriceId,
   getSubscriptionPeriod,
+  handleSubscriptionEvent,
 };

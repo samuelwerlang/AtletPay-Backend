@@ -1,8 +1,6 @@
 import Stripe from "stripe";
 import { SubscriptionStatus } from "@prisma/client";
-export default function mapStripeStatusToPrisma(
-  status: Stripe.Subscription.Status,
-) {
+function mapStripeStatusToPrisma(status: Stripe.Subscription.Status) {
   switch (status) {
     case "active":
       return SubscriptionStatus.ACTIVE;
@@ -20,3 +18,5 @@ export default function mapStripeStatusToPrisma(
       return SubscriptionStatus.INCOMPLETE;
   }
 }
+
+export { mapStripeStatusToPrisma };

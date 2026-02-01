@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma.js";
-
+import { SubscriptionStatus } from "@prisma/client";
 export async function checkSaasSubscription(
   req: Request,
   res: Response,
@@ -22,12 +22,14 @@ export async function checkSaasSubscription(
   }
 
   switch (subscription.status) {
-    case "CANCELED":
+    case SubscriptionStatus.CANCELED:
       return res.status(403).json({ message: "Subscription canceled" });
-    case "INCOMPLETE":
+    case SubscriptionStatus.INCOMPLETE:
       return res.status(403).json({ message: "Subscription incomplete" });
-    case "PAST_DUE":
+    case SubscriptionStatus.PAST_DUE:
       return res.status(403).json({ message: "Subscription past-due" });
+    case SubscriptionStatus.UNPAID:
+      return res.status(403).json({ message: "Subscription unpaid" });
     default:
       break;
   }

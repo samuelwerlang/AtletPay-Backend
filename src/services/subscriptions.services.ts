@@ -19,67 +19,68 @@ function extractStripeCustomerId(
   return typeof customerId === "string" ? customerId : customerId.id;
 }
 
-async function createSubscriptionService(dto: SubscriptionDTO) {
-  const stripeCustomerId = extractStripeCustomerId(dto.stripeCustomerId);
+// async function createSubscriptionService(dto: SubscriptionDTO) {
+//   const stripeCustomerId = extractStripeCustomerId(dto.stripeCustomerId);
 
-  const result = await prisma.subscription.upsert({
-    where: { stripeSubscriptionId: dto.stripeSubscriptionId },
-    create: {
-      userId: dto.userId,
-      saasPlanId: dto.saasPlanId,
-      stripeCustomerId,
-      stripeSubscriptionId: dto.stripeSubscriptionId,
-      status: dto.status, // NÃO sobrescreva com ACTIVE
-      cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? false,
-      currentPeriodStart: dto.currentPeriodStart,
-      currentPeriodEnd: dto.currentPeriodEnd,
-    },
-    update: {
-      saasPlanId: dto.saasPlanId,
-      stripeCustomerId,
-      status: dto.status,
-      cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? false,
-      currentPeriodStart: dto.currentPeriodStart,
-      currentPeriodEnd: dto.currentPeriodEnd,
-    },
-  });
-
-  return result;
-}
-// async function createSubscriptionService(subscriptionData: SubscriptionDTO) {
-//   const createdSubscription = await prisma.$transaction(async (tx) => {
-//     const existingSubscription = await tx.subscription.findFirst({
-//       where: {
-//         userId: subscriptionData.userId,
-//         status: {
-//           in: [
-//             SubscriptionStatus.ACTIVE,
-//             SubscriptionStatus.PAST_DUE,
-//             SubscriptionStatus.INCOMPLETE,
-//           ],
-//         },
-//       },
-//       select: { status: true },
-//     });
-
-//     if (existingSubscription) {
-//       throw new Error(
-//         `User already has an active or pending subscription (${existingSubscription.status})`,
-//       );
-//     }
-
-//     return tx.subscription.create({
-//       data: {
-//         ...subscriptionData,
-//         stripeCustomerId: extractStripeCustomerId(
-//           subscriptionData.stripeCustomerId,
-//         ),
-//         status: SubscriptionStatus.ACTIVE,
-//       },
-//     });
+//   const result = await prisma.subscription.upsert({
+//     where: { stripeSubscriptionId: dto.stripeSubscriptionId },
+//     create: {
+//       userId: dto.userId,
+//       saasPlanId: dto.saasPlanId,
+//       stripeCustomerId,
+//       stripeSubscriptionId: dto.stripeSubscriptionId,
+//       status: dto.status, // NÃO sobrescreva com ACTIVE
+//       cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? false,
+//       currentPeriodStart: dto.currentPeriodStart,
+//       currentPeriodEnd: dto.currentPeriodEnd,
+//     },
+//     update: {
+//       saasPlanId: dto.saasPlanId,
+//       stripeCustomerId,
+//       status: dto.status,
+//       cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? false,
+//       currentPeriodStart: dto.currentPeriodStart,
+//       currentPeriodEnd: dto.currentPeriodEnd,
+//     },
 //   });
-//   return createdSubscription;
+
+//   return result;
 // }
+
+async function createSubscriptionService(subscriptionData: SubscriptionDTO) {
+  const createdSubscription = await prisma.$transaction(async (tx) => {
+    const existingSubscription = await tx.subscription.findFirst({
+      where: {
+        userId: subscriptionData.userId,
+        status: {
+          in: [
+            SubscriptionStatus.ACTIVE,
+            SubscriptionStatus.PAST_DUE,
+            SubscriptionStatus.INCOMPLETE,
+          ],
+        },
+      },
+      select: { status: true },
+    });
+
+    if (existingSubscription) {
+      throw new Error(
+        `User already has an active or pending subscription (${existingSubscription.status})`,
+      );
+    }
+
+    return tx.subscription.create({
+      data: {
+        ...subscriptionData,
+        stripeCustomerId: extractStripeCustomerId(
+          subscriptionData.stripeCustomerId,
+        ),
+        status: SubscriptionStatus.ACTIVE,
+      },
+    });
+  });
+  return createdSubscription;
+}
 
 async function cancelSubscriptionService(userId: string) {
   return prisma.$transaction(async (tx) => {

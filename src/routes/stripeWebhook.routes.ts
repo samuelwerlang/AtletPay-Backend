@@ -29,8 +29,7 @@ router.post(
       url: (request as any).originalUrl,
       method: request.method,
     });
-    const endpointSecret =
-      "whsec_5b0e9405eef554eca33bae3a7dd47fa537690cfb14675958ad39dd088fdfe6fa";
+    const endpointSecret = `${config.STRIPE_WEBHOOK_SECRET}`;
 
     let event: Stripe.Event;
     try {

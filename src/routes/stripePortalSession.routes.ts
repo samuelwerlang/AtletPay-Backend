@@ -13,30 +13,17 @@ router.post(
   requireAuth,
   getCurrentUser,
   async (req, res) => {
-    // For demonstration purposes, we're using the Checkout session to retrieve the customer_account ID.
-    // Typically this is stored alongside the authenticated user in your database.
-    const { user } = res.locals.user;
-    const checkoutSession = await stripe.checkout.sessions.retrieve(user?.id);
+    const user = res.locals.user;
 
-    // This is the url to which the customer will be redirected when they're done
-    // managing their billing with the portal.
-    const returnUrl = config.baseurl;
-
-    // Validate that customer exists and extract the ID if it's an object
-    const customerId =
-      typeof checkoutSession.customer === "string"
-        ? checkoutSession.customer
-        : checkoutSession.customer?.id;
-
-    if (!customerId) {
-      return res
-        .status(400)
-        .json({ error: "Customer not found in checkout session" });
+    if (!user.stripeCustomerId) {
+      return res.status(400).json({
+        error: "User does not have a Stripe customer",
+      });
     }
 
     const portalSession = await stripe.billingPortal.sessions.create({
-      customer: customerId,
-      return_url: returnUrl,
+      customer: user.stripeCustomerId,
+      return_url: config.baseurl,
       locale: "pt-BR",
     });
 

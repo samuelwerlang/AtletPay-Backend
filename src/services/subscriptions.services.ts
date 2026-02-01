@@ -82,34 +82,10 @@ async function createSubscriptionService(subscriptionData: SubscriptionDTO) {
   return createdSubscription;
 }
 
-// async function updateSubscriptionService(
-//   subscriptionData: SubscriptionDTO,
-//   userId: string,
-// ) {
-//   return prisma.$transaction(async (tx) => {
-//     const activeSubscription = await tx.subscription.findFirst({
-//       where: {
-//         userId,
-//         status: SubscriptionStatus.ACTIVE,
-//       },
-//     });
-
-//     if (!activeSubscription) {
-//       throw new Error("There is no active subscription for this user");
-//     }
-
-//     const updatedSubscription = await tx.subscription.update({
-//       where: {
-//         id: activeSubscription.id,
-//       },
-//       data: {
-//         status: SubscriptionStatus.CANCELLED,
-//       },
-//     });
-//   });
-// }
-
-async function cancelSubscriptionService(userId: string) {
+async function updateSubscriptionService(
+  subscriptionData: SubscriptionDTO,
+  userId: string,
+) {
   return prisma.$transaction(async (tx) => {
     const activeSubscription = await tx.subscription.findFirst({
       where: {
@@ -121,9 +97,17 @@ async function cancelSubscriptionService(userId: string) {
     if (!activeSubscription) {
       throw new Error("There is no active subscription for this user");
     }
-    // Apenas retorna dados para o controller chamar o Stripe
-    return activeSubscription;
+
+    const updatedSubscription = await tx.subscription.update({
+      where: {
+        id: activeSubscription.id,
+      },
+      data: {
+        ...subscriptionData,
+      },
+    });
+    return updatedSubscription;
   });
 }
 
-export { createSubscriptionService, cancelSubscriptionService };
+export { createSubscriptionService, updateSubscriptionService };

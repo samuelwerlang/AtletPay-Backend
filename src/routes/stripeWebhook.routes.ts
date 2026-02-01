@@ -5,11 +5,20 @@ import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
 
 // --Services--
-import { createSubscriptionService } from "../services/subscriptions.services.js";
+import {
+  createSubscriptionService,
+  updateSubscriptionService,
+} from "../services/subscriptions.services.js";
 
 // --Utils--
 import { mapStripeStatusToPrisma } from "../utils/statusMap.js";
-import { getSubscriptionPeriod } from "../utils/getSubscriptionPeriod.js";
+//import { getSubscriptionPeriod } from "../utils/getSubscriptionPeriod.js";
+import {
+  getUserBasedOnCustomerId,
+  getSaasPlanBasedOnPriceId,
+  getSubscriptionPeriod,
+} from "../utils/stripeWebhookHandlers.js";
+import { SubscriptionStatus } from "@prisma/client";
 
 const router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);
@@ -37,6 +46,7 @@ router.post(
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object as Stripe.Checkout.Session;
+          console.log(session.customer);
 
           const userId = session.client_reference_id!;
           const stripeCustomerId =
@@ -64,50 +74,27 @@ router.post(
         }
         case "customer.subscription.created": {
           const sub = event.data.object as Stripe.Subscription;
-
           const stripeCustomerId =
             typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
-
+          const priceId = sub.items?.data?.[0]?.price?.id;
+          const user = await getUserBasedOnCustomerId(stripeCustomerId);
+          const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
+          const { currentPeriodStart, currentPeriodEnd } =
+            await getSubscriptionPeriod(sub);
           if (!stripeCustomerId) {
             console.warn("Missing stripe customerId");
             break;
           }
-
-          const user = await prisma.user.findFirst({
-            where: {
-              stripeCustomerId,
-            },
-            select: {
-              id: true,
-            },
-          });
-
-          if (!user) {
-            console.warn(
-              "User associated with the given stripeCustomerId not found",
-            );
-            break;
-          }
-
-          const priceId = sub.items?.data?.[0]?.price?.id;
           if (!priceId) {
             console.warn("Missing PriceId in subscription");
             break;
           }
-
-          const saasPlan = await prisma.saasPlan.findUnique({
-            where: { StripePriceId: priceId },
-            select: { id: true },
-          });
-
-          if (!saasPlan) {
-            console.warn("SaasPlan não encontrado para Price:", priceId);
+          if (!user) {
             break;
           }
-
-          const { currentPeriodStart, currentPeriodEnd } =
-            await getSubscriptionPeriod(sub);
-
+          if (!saasPlan) {
+            break;
+          }
           await createSubscriptionService({
             userId: user!.id,
             saasPlanId: saasPlan.id,
@@ -121,6 +108,68 @@ router.post(
           });
           break;
         }
+        case "customer.subscription.updated": {
+          const sub = event.data.object as Stripe.Subscription;
+          const stripeCustomerId =
+            typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+          const priceId = sub.items?.data?.[0]?.price?.id;
+          const user = await getUserBasedOnCustomerId(stripeCustomerId);
+          const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
+          const { currentPeriodStart, currentPeriodEnd } =
+            await getSubscriptionPeriod(sub);
+
+          if (!user) break;
+          if (!priceId || !saasPlan) break;
+
+          await updateSubscriptionService(
+            {
+              userId: user.id,
+              saasPlanId: saasPlan.id,
+              stripeCustomerId,
+              stripeSubscriptionId: sub.id,
+              status: mapStripeStatusToPrisma(sub.status),
+              cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
+              currentPeriodStart,
+              currentPeriodEnd,
+            },
+            user.id,
+          );
+          console.log(
+            `Subscription updated for user ${user.id} | stripeSubscriptionId: ${sub.id}`,
+          );
+          break;
+        }
+        case "customer.subscription.deleted": {
+          const sub = event.data.object as Stripe.Subscription;
+          const stripeCustomerId =
+            typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+          const priceId = sub.items?.data?.[0]?.price?.id;
+          const user = await getUserBasedOnCustomerId(stripeCustomerId);
+          const saasPlan = await getSaasPlanBasedOnPriceId(priceId);
+          const { currentPeriodStart, currentPeriodEnd } =
+            await getSubscriptionPeriod(sub);
+
+          if (!user) break;
+          if (!priceId || !saasPlan) break;
+
+          await updateSubscriptionService(
+            {
+              userId: user.id,
+              saasPlanId: saasPlan.id,
+              stripeCustomerId,
+              stripeSubscriptionId: sub.id,
+              status: SubscriptionStatus.CANCELED,
+              cancelAtPeriodEnd: sub.cancel_at_period_end ?? false,
+              currentPeriodStart,
+              currentPeriodEnd,
+            },
+            user.id,
+          );
+          console.log(
+            `Subscription canceled for user ${user.id} | stripeSubscriptionId: ${sub.id}`,
+          );
+          break;
+        }
         default:
           console.error("Unhandled event type:", event.type);
           break;
@@ -128,7 +177,6 @@ router.post(
     } catch (err) {
       console.error("Webhook handler error:", err);
     }
-
     return response.send();
   },
 );

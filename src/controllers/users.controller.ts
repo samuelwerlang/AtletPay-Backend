@@ -23,7 +23,7 @@ async function createUserController(req: Request, res: Response) {
 
   const user = await createUserService({
     sub: sub,
-    email,
+    email: email,
     name: displayName,
   });
 

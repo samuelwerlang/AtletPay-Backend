@@ -54,7 +54,7 @@ router.post(
               ? session.customer
               : session.customer?.id;
 
-          // Atualiza o User com Customer
+          // Update user with customerId
           if (userId && stripeCustomerId) {
             try {
               await prisma.user.update({

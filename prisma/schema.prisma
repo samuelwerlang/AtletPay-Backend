@@ -17,7 +17,7 @@ model User {
   name         String?       @unique
   expenses     Expense[]
   students     Student[]
-  subscription Subscription?
+  subscription Subscription[]
   plans        UserPlan[]
 }
 
@@ -146,7 +146,7 @@ model SaasPlan {
 model Subscription {
   id                   String             @id @default(uuid())
   status               SubscriptionStatus @default(ACTIVE)
-  userId               String             @unique
+  userId               String             
   cancelAtPeriodEnd    Boolean            @default(false)
   createdAt            DateTime           @default(now())
   currentPeriodEnd     DateTime

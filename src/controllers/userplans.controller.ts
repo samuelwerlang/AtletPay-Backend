@@ -38,7 +38,7 @@ async function createUserPlanController(req: Request, res: Response) {
   const plan = await createUserPlanService(
     parsedResult,
     user.id,
-    user.stripeAccount,
+    user.stripeAccountId,
   );
 
   return res.status(201).json(plan);

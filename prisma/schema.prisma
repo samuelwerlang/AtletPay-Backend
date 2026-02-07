@@ -94,21 +94,32 @@ model RecurringCharge {
 }
 
 model UserPlan {
-  id              String        @id @default(uuid())
-  name            String
-  price           Int
-  sessionsPerWeek Int
-  durationInWeeks Int
-  description     String
-  isActive        Boolean       @default(true)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  userId          String
-  studentPlans    StudentPlan[]
+  id               String   @id @default(uuid())
+  name             String
+  price            Int
+  sessionsPerWeek  Int
+  durationInWeeks  Int
 
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeAccountId  String   // Stripe Connect
+  stripeProductId  String
+  stripePriceId    String
+
+  description      String
+  isActive         Boolean  @default(true)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentPlans     StudentPlan[]
+
+  @@unique([userId, name]) // regra de negócio 
+  @@unique([stripeAccountId, stripeProductId])
+  @@unique([stripeAccountId, stripePriceId])
 
   @@index([userId])
+  @@index([stripeAccountId])
 }
 
 model StudentPlan {

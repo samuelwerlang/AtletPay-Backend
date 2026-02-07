@@ -1,6 +1,7 @@
 import config from "../config/config.js";
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
+import { createProductWithPriceService } from "./StripeServices/stripeCreateProductwithPrice.services.js";
 
 const stripe = new Stripe(`${config.STRIPE_API_KEY}`);
 interface IPlanInfo {
@@ -19,31 +20,25 @@ async function createUserPlanService(
   const { name, price, description, durationInWeeks, sessionsPerWeek } =
     planInfo;
 
-  //This will create the product on user's stripe connect account
-  try {
-    //Create Product
-    const product = await stripe.products.create(
-      {
-        name: name,
-        description: description,
-      },
-      { stripeAccount: stripeAccountId },
-    );
+  const existingPlan = await prisma.userPlan.findFirst({
+    where: {
+      userId,
+      name,
+    },
+  });
 
-    //Create product price
-    await stripe.prices.create(
-      {
-        product: product.id,
-        unit_amount: price,
-        currency: "brl",
-      },
-      { stripeAccount: stripeAccountId },
-    );
-  } catch (err: any) {
-    throw new Error(`${err.message}`);
+  if (existingPlan) {
+    throw new Error("Plan with this name already exists");
   }
+  const { productId, priceId } = await createProductWithPriceService({
+    name,
+    description,
+    unitAmount: price,
+    currency: "brl",
+    stripeAccountId,
+  });
 
-  return await prisma.userPlan.create({
+  return prisma.userPlan.create({
     data: {
       name,
       price,
@@ -51,6 +46,9 @@ async function createUserPlanService(
       durationInWeeks,
       sessionsPerWeek,
       userId,
+      stripeProductId: productId,
+      stripePriceId: priceId,
+      stripeAccountId: stripeAccountId,
     },
   });
 }

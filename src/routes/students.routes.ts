@@ -22,7 +22,13 @@ router.post(
   checkStudentLimit,
   createStudentController,
 );
-router.get("/students", jwtCheck, requireAuth, getAllStudentsController);
+router.get(
+  "/students",
+  jwtCheck,
+  requireAuth,
+  getCurrentUser,
+  getAllStudentsController,
+);
 router.get(
   "/student/:studentId",
   jwtCheck,

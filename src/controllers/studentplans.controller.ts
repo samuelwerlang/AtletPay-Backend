@@ -5,7 +5,7 @@ import {
   cancelStudentPlanService,
 } from "../services/studentplans.services.js";
 
-const studenPlanSchema = z.object({
+const studentPlanSchema = z.object({
   studentId: z.uuid(),
   planId: z.uuid(),
   //   startDate: z.date(),
@@ -18,7 +18,7 @@ const idStudentPlan = z.object({
 });
 
 async function createStudentPlanController(req: Request, res: Response) {
-  const validatedOutput = studenPlanSchema.parse(req.body);
+  const validatedOutput = studentPlanSchema.parse(req.body);
   const user = res.locals.user;
   if (!user?.id) {
     return res

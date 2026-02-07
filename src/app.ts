@@ -10,6 +10,7 @@ import userPlansRouter from "./routes/plans.routes.js";
 import studentPlansRouter from "./routes/studentplans.routes.js";
 
 import createCheckoutSession from "./routes/stripeCheckoutSession.routes.js";
+import createStudentPlanCheckout from "./routes/stripeStudentCheckoutSession.routes.js";
 import createPortalSession from "./routes/stripePortalSession.routes.js";
 import createConnectAccount from "./routes/stripeCreateConnectedAccount.routes.js";
 import linkConnectAccount from "./routes/stripeConnectedAccountLink.routes.js";
@@ -48,6 +49,7 @@ app.use("/api", createCheckoutSession);
 app.use("/api", createPortalSession);
 app.use("/api", createConnectAccount);
 app.use("/api", linkConnectAccount);
+app.use("/api", createStudentPlanCheckout);
 
 app.get("/authorized", jwtCheck, (req, res) => {
   res.json({ message: "Secured Resource" });

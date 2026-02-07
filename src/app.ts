@@ -11,6 +11,8 @@ import studentPlansRouter from "./routes/studentplans.routes.js";
 
 import createCheckoutSession from "./routes/stripeCheckoutSession.routes.js";
 import createPortalSession from "./routes/stripePortalSession.routes.js";
+import createConnectAccount from "./routes/stripeCreateConnectedAccount.routes.js";
+import linkConnectAccount from "./routes/stripeConnectedAccountLink.routes.js";
 
 const app = express();
 
@@ -29,10 +31,10 @@ app.get("/callback", (req, res) => {
     <h1>Login OK</h1>
     <p>Copie o access_token da URL</p>
     <script>
-      const hash = window.location.hash;
-      document.body.innerHTML += "<pre>" + hash + "</pre>";
+    const hash = window.location.hash;
+    document.body.innerHTML += "<pre>" + hash + "</pre>";
     </script>
-  `);
+    `);
 });
 
 // ================= PROTECTED ROUTES =================
@@ -44,6 +46,8 @@ app.use("/api", userPlansRouter);
 app.use("/api", studentPlansRouter);
 app.use("/api", createCheckoutSession);
 app.use("/api", createPortalSession);
+app.use("/api", createConnectAccount);
+app.use("/api", linkConnectAccount);
 
 app.get("/authorized", jwtCheck, (req, res) => {
   res.json({ message: "Secured Resource" });

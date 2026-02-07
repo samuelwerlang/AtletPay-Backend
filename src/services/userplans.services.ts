@@ -1,5 +1,8 @@
+import config from "../config/config.js";
+import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
 
+const stripe = new Stripe(`${config.STRIPE_API_KEY}`);
 interface IPlanInfo {
   name: string;
   price: number;
@@ -8,10 +11,39 @@ interface IPlanInfo {
   sessionsPerWeek: number;
 }
 
-async function createUserPlanService(planInfo: IPlanInfo, userId: string) {
+async function createUserPlanService(
+  planInfo: IPlanInfo,
+  userId: string,
+  stripeAccountId: string,
+) {
   const { name, price, description, durationInWeeks, sessionsPerWeek } =
     planInfo;
-  return prisma.userPlan.create({
+
+  //This will create the product on user's stripe connect account
+  try {
+    //Create Product
+    const product = await stripe.products.create(
+      {
+        name: name,
+        description: description,
+      },
+      { stripeAccount: stripeAccountId },
+    );
+
+    //Create product price
+    await stripe.prices.create(
+      {
+        product: product.id,
+        unit_amount: price,
+        currency: "brl",
+      },
+      { stripeAccount: stripeAccountId },
+    );
+  } catch (err: any) {
+    throw new Error(`${err.message}`);
+  }
+
+  return await prisma.userPlan.create({
     data: {
       name,
       price,
@@ -35,6 +67,7 @@ async function updateUserPlanService(
     },
     data: planInfo,
   });
+
   if (updatedUserPlan.count === 0) {
     throw new Error("Plan not found or not owned by user");
   }
@@ -43,7 +76,7 @@ async function updateUserPlanService(
 }
 
 async function getUserPlanService(planId: string, userId: string) {
-  return prisma.userPlan.findFirstOrThrow({
+  return await prisma.userPlan.findFirstOrThrow({
     where: {
       id: planId,
       userId: userId,
@@ -67,7 +100,7 @@ async function deleteUserPlanService(planId: string, userId: string) {
 }
 
 async function getAllUserPlansService(userId: string) {
-  return prisma.userPlan.findMany({
+  return await prisma.userPlan.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
   });

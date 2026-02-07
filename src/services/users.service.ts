@@ -1,9 +1,11 @@
 import { prisma } from "../lib/prisma.js";
 
-interface IUserData {
+export interface IUserData {
   sub: string;
   email: string;
   name?: string;
+  stripeCustomerId?: string;
+  stripeAccountId?: string;
 }
 
 async function createUserService(userCredentials: IUserData) {
@@ -39,17 +41,19 @@ async function getUserService(auth0Id: string) {
 }
 
 async function updateUserService(userCredentials: IUserData) {
-  const auth0Id = userCredentials?.sub;
+  const auth0Id = userCredentials.sub;
 
   if (!auth0Id) {
-    throw new Error("Auth0 ID is required to update user");
+    throw new Error("[UPDATE-USER-SERVICE]Auth0 ID is required to update user");
   }
 
   return prisma.user.update({
     where: { auth0Id },
     data: {
+      auth0Id: userCredentials.sub,
       email: userCredentials.email,
       name: userCredentials.name,
+      stripeAccountId: userCredentials.stripeAccountId,
     },
     select: {
       email: true,

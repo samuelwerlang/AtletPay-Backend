@@ -31,7 +31,15 @@ async function createUserPlanController(req: Request, res: Response) {
       .status(401)
       .json({ message: "User not loaded in request context" });
   }
-  const plan = await createUserPlanService(parsedResult, user.id);
+  if (!user?.stripeAccountId) {
+    return res.status(401).json({ message: "Non-existing Stripe account" });
+  }
+
+  const plan = await createUserPlanService(
+    parsedResult,
+    user.id,
+    user.stripeAccount,
+  );
 
   return res.status(201).json(plan);
 }

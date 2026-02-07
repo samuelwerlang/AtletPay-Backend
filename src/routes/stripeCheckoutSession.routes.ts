@@ -63,6 +63,7 @@ router.post(
   getCurrentUser,
   blockIfSubscriptionExists,
   async (req, res) => {
+    console.log("CHECKOUT SESSION ROUTE CALLED");
     let user = res.locals.user;
     if (!user) {
       return res.status(500).json({
@@ -85,7 +86,7 @@ router.post(
       });
     }
 
-    // 2Lista preços
+    // Lista preços
     const prices = await stripe.prices.list({
       lookup_keys: [req.body.lookup_key],
       expand: ["data.product"],

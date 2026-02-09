@@ -7,7 +7,7 @@ import Stripe from "stripe";
 import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
 import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
-import { blockIfSubscriptionExists } from "../middlewares/blockIfSubscriptionExists.middleware.js";
+import { createChargeService } from "../services/charges.services.js";
 
 const router: Router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);
@@ -26,6 +26,7 @@ router.post(
     const user = res.locals.user;
     const { studentId, userPlanId } = checkoutSchema.parse(req.body);
 
+    //Make sure there is a Student
     await prisma.student.findFirstOrThrow({
       where: { id: studentId, userId: user.id },
     });
@@ -33,9 +34,19 @@ router.post(
     const userPlan = await prisma.userPlan.findFirstOrThrow({
       where: { id: userPlanId, userId: user.id },
       select: {
+        id: true,
         stripePriceId: true,
         stripeAccountId: true,
+        price: true,
       },
+    });
+
+    //Create a PENDING Charge
+    const charge = await prisma.$transaction(async (tx) => {
+      return createChargeService(tx, {
+        studentId,
+        amount: userPlan.price,
+      });
     });
 
     // Get the price's type from Stripe
@@ -55,6 +66,20 @@ router.post(
           },
         ],
         mode: mode,
+        payment_intent_data: {
+          metadata: {
+            studentId,
+            userPlanId,
+            userId: user!.id,
+            chargeId: charge.id,
+          },
+        },
+        metadata: {
+          studentId,
+          userPlanId,
+          userId: user!.id,
+          chargeId: charge!.id,
+        },
         // Defines where Stripe will redirect a customer after successful payment
         success_url: `${config.baseurl}/done?session_id={CHECKOUT_SESSION_ID}`,
         // Defines where Stripe will redirect if a customer cancels payment
@@ -72,9 +97,10 @@ router.post(
       },
     );
 
-    // Redirect to the Stripe hosted checkout URL
-    // res.redirect(303, session.url!);
-    return res.status(200).json({ checkoutUrl: `${session.url}` });
+    // Return the checkout session url
+    return res
+      .status(200)
+      .json({ checkoutUrl: session.url, chargeId: charge.id });
   },
 );
 

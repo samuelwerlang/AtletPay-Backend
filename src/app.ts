@@ -1,7 +1,8 @@
 import express from "express";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
-import stripeWebhook from "./routes/stripeWebhook.routes.js";
+import stripeWebhook from "./routes/webHooks/stripeWebhook.routes.js";
+import stripeStudentWebhook from "./routes/webHooks/stripeStudentWebhook.routes.js";
 import usersRouter from "./routes/me.routes.js";
 import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
@@ -19,6 +20,7 @@ const app = express();
 
 // ================ WEBHOOKS ================
 app.use("/api", stripeWebhook);
+app.use("/api", stripeStudentWebhook);
 // ================= MIDDLEWARES =================
 app.use(express.json());
 

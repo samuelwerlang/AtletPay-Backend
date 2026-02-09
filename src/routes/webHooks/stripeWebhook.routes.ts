@@ -1,14 +1,14 @@
 // --Setup--
-import config from "../config/config.js";
+import config from "../../config/config.js";
 import express from "express";
 import Stripe from "stripe";
-import { prisma } from "../lib/prisma.js";
+import { prisma } from "../../lib/prisma.js";
 
 // --Services--
 import {
   createSubscriptionService,
   updateSubscriptionService,
-} from "../services/subscriptions.services.js";
+} from "../../services/subscriptions.services.js";
 
 // --Utils--
 import {
@@ -17,7 +17,7 @@ import {
   // getSubscriptionPeriod,
   mapStripeStatusToPrisma,
   handleSubscriptionEvent,
-} from "../utils/stripeWebhookHandlers.js";
+} from "../../utils/stripeWebhookHandlers.js";
 import { SubscriptionStatus } from "@prisma/client";
 
 const router = express.Router();

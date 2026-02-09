@@ -50,48 +50,45 @@ model Expense {
 
 model Charge {
   id             String        @id @default(uuid())
-  amount         Int           // em centavos (minor units)
+  studentPlanId  String?       // vincula ao plano do aluno, preenchido após pagamento
+  studentId      String        // aluno que vai pagar
+  amount         Int           // em centavos
   currency       String        @default("BRL")
-  dueDate        DateTime
-  status         ChargeStatus  @default(PAID)
-  description    String?
-  studentPlanId  String
-  // denormalizado para facilitar filtros:
-  studentId      String
-  externalId     String?       // id do gateway (Stripe, etc.)
-  paidAt         DateTime?
+  status         ChargeStatus  @default(PENDING) // PENDING | PAID | FAILED | CANCELED
+  description    String?       // info opcional, ex.: nome do plano
+  externalId     String?       // id do Stripe ou outro gateway
+  paidAt         DateTime?     // preenchido quando pagamento confirmado
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  studentPlan    StudentPlan   @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
-
-  @@index([studentPlanId])
-  @@index([studentId])
-  @@unique([studentPlanId, dueDate])
-}
-
-model RecurringCharge {
-  id             String           @id @default(uuid())
-  amount         Int              // em centavos (minor units)
-  currency       String           @default("BRL")
-  interval       BillingInterval  @default(MONTHLY)
-  startDate      DateTime         // início da recorrência
-  nextRunAt      DateTime         // próxima geração de cobrança
-  lastRunAt      DateTime?        // última execução
-  anchorDayOfMonth Int?           // opcional: para ciclos mensais (ex.: dia 15)
-  status         RecurringStatus  @default(ACTIVE)
-
-  studentPlanId  String
-  studentId      String           // denormalizado para filtros
-
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-
-  studentPlan    StudentPlan      @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
+  studentPlan    StudentPlan?  @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
 
   @@index([studentPlanId])
   @@index([studentId])
 }
+
+// model RecurringCharge {
+//   id             String           @id @default(uuid())
+//   amount         Int              // em centavos (minor units)
+//   currency       String           @default("BRL")
+//   interval       BillingInterval  @default(MONTHLY)
+//   startDate      DateTime         // início da recorrência
+//   nextRunAt      DateTime         // próxima geração de cobrança
+//   lastRunAt      DateTime?        // última execução
+//   anchorDayOfMonth Int?           // opcional: para ciclos mensais (ex.: dia 15)
+//   status         RecurringStatus  @default(ACTIVE)
+
+//   studentPlanId  String
+//   studentId      String           // denormalizado para filtros
+
+//   createdAt      DateTime         @default(now())
+//   updatedAt      DateTime         @updatedAt
+
+//   studentPlan    StudentPlan      @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
+
+//   @@index([studentPlanId])
+//   @@index([studentId])
+// }
 
 model UserPlan {
   id               String   @id @default(uuid())
@@ -131,7 +128,7 @@ model StudentPlan {
   endDate         DateTime?
   priceAtPurchase Int
   charges         Charge[]
-  recurringCharges RecurringCharge[]
+  // recurringCharges RecurringCharge[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   plan            UserPlan          @relation(fields: [planId], references: [id], onDelete: Cascade)
@@ -191,7 +188,7 @@ enum StudentPlanStatus {
 enum ChargeStatus {
   PENDING
   PAID
-  OVERDUE
+  FAILED
   CANCELED
 }
 

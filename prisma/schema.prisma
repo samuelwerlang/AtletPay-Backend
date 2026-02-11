@@ -55,8 +55,10 @@ model Charge {
   amount         Int           // em centavos
   currency       String        @default("BRL")
   status         ChargeStatus  @default(PENDING) // PENDING | PAID | FAILED | CANCELED
-  description    String?       // info opcional, ex.: nome do plano
+  description    String? // info opcional, ex.: nome do plano
   externalId     String?       // id do Stripe ou outro gateway
+  checkoutSessionId String?       // para facilitar reconciliação
+
   paidAt         DateTime?     // preenchido quando pagamento confirmado
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

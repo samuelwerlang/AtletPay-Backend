@@ -43,9 +43,6 @@ async function createChargeService(
       description,
       status: ChargeStatus.PENDING,
     },
-    select: {
-      id: true,
-    },
   });
 }
 

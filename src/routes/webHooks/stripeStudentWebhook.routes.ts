@@ -24,21 +24,19 @@ router.post(
   express.raw({ type: "application/json" }),
   async (req: Request, res: Response) => {
     console.log("DENTRO DO WEBHOOK");
-    let event = req.body;
+    let event: Stripe.Event;
     const endpointSecret = `${config.STRIPE_WEBHOOK_SECRET}`;
 
-    if (endpointSecret) {
+    try {
       const signature = req.headers["stripe-signature"] as string;
-      try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          signature,
-          endpointSecret,
-        );
-      } catch (err: any) {
-        console.log(`⚠️  Webhook signature verification failed.`, err.message);
-        return res.sendStatus(400);
-      }
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        signature,
+        endpointSecret,
+      );
+    } catch (err: any) {
+      console.error("⚠️ Webhook signature verification failed:", err.message);
+      return res.sendStatus(400);
     }
 
     let stripeObject;
@@ -52,27 +50,29 @@ router.post(
         // Then define and call a method to handle the subscription deleted.
         // handleSubscriptionDeleted(stripeObject);
         break;
-      case "checkout.session.completed": {
-        // const session = event.data.object as Stripe.Checkout.Session;
-        // if (!session.metadata) {
-        //   throw new Error("[STRIPE-PAYMENT-WEBHOOK] Session does not exist");
-        // }
-        // const { studentId, userPlanId, userId } = session.metadata;
-        // const studentPlanDTO: IStudentPlan = {
-        //   studentId: studentId,
-        //   planId: userPlanId,
-        // };
-        // await createStudentPlanService(studentPlanDTO, userId);
-        // break;
-      }
-      case "charge.succeeded": {
-        const stripeCharge = event.data.object as Stripe.Charge;
+      case "checkout.session.completed":
+        break;
+      // const session = event.data.object as Stripe.Checkout.Session;
+      // if (!session.metadata) {
+      //   throw new Error("[STRIPE-PAYMENT-WEBHOOK] Session does not exist");
+      // }
+      // const { studentId, userPlanId, userId } = session.metadata;
+      // const studentPlanDTO: IStudentPlan = {
+      //   studentId: studentId,
+      //   planId: userPlanId,
+      // };
+      // await createStudentPlanService(studentPlanDTO, userId);
+      // break;
+
+      case "payment_intent.succeeded": {
+        const stripeCharge = event.data.object as Stripe.PaymentIntent;
+        // console.log(stripeCharge);
 
         const { studentId, userPlanId, userId, chargeId } =
           stripeCharge.metadata;
         console.log(stripeCharge.metadata);
         if (!studentId || !userPlanId || !userId || !chargeId) {
-          console.log("[CHARCE.SUCCEEDED] Incomplete Charge Metadata");
+          console.log("[CHARGE.SUCCEEDED] Incomplete Charge Metadata");
           break;
         }
 
@@ -93,6 +93,7 @@ router.post(
             },
             userId,
           );
+          console.log(studentPlan.id);
 
           await markChargePaidService(tx, {
             chargeId,

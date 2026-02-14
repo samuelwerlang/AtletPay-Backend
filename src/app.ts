@@ -7,14 +7,14 @@ import usersRouter from "./routes/me.routes.js";
 import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
 import expensesRouter from "./routes/expenses.routes.js";
-import userPlansRouter from "./routes/plans.routes.js";
+import userPlansRouter from "./routes/userPlans.routes.js";
 import studentPlansRouter from "./routes/studentplans.routes.js";
 
-import createCheckoutSession from "./routes/stripeCheckoutSession.routes.js";
-import createStudentPlanCheckout from "./routes/stripeStudentCheckoutSession.routes.js";
+import createCheckoutSession from "./routes/Checkouts/stripeCheckoutSession.routes.js";
+import createStudentPlanCheckout from "./routes/Checkouts/stripeStudentCheckoutSession.routes.js";
 import createPortalSession from "./routes/stripePortalSession.routes.js";
-import createConnectAccount from "./routes/stripeCreateConnectedAccount.routes.js";
-import linkConnectAccount from "./routes/stripeConnectedAccountLink.routes.js";
+import createConnectAccount from "./routes/Connect/stripeCreateConnectedAccount.routes.js";
+import linkConnectAccount from "./routes/Connect/stripeConnectedAccountLink.routes.js";
 
 const app = express();
 

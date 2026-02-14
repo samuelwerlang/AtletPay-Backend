@@ -8,13 +8,16 @@ import {
   getAllUserPlansService,
   updateUserPlanService,
 } from "../services/userplans.services.js";
+import { UserPlanRecurringIntervalType } from "@prisma/client";
 
 const userPlanSchema = z.object({
   name: z.string().min(1),
   price: z.number().positive(),
   description: z.string().min(1),
-  durationInWeeks: z.number().int().positive(),
+  durationInMonths: z.number().int().positive(),
   sessionsPerWeek: z.number().int().positive(),
+  isRecurrent: z.boolean(),
+  intervalType: z.enum(UserPlanRecurringIntervalType).optional(),
 });
 
 const updateUserPlanSchema = userPlanSchema.partial();

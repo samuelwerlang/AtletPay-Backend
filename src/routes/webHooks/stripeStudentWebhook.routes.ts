@@ -1,124 +1,264 @@
 import config from "../../config/config.js";
 import { prisma } from "../../lib/prisma.js";
 import Stripe from "stripe";
-import express from "express";
-import { Router, Request, Response } from "express";
+import express, { Router, Request, Response } from "express";
 
-//Services
+// Services
 import {
   markChargePaidService,
   markChargeFailedService,
+  createChargeService,
 } from "../../services/charges.services.js";
-import { ChargeStatus } from "@prisma/client";
+import { ChargeStatus, StudentPlanStatus } from "@prisma/client";
 
 import {
+  cancelStudentPlanService,
   createStudentPlanService,
-  IStudentPlan,
 } from "../../services/studentplans.services.js";
 
-const stripe = new Stripe(`${config.STRIPE_WEBHOOK_SECRET}`);
+const stripe = new Stripe(config.STRIPE_API_KEY);
 const router: Router = express.Router();
 
 router.post(
   "/webhook/stripe/connect",
   express.raw({ type: "application/json" }),
   async (req: Request, res: Response) => {
-    console.log("DENTRO DO WEBHOOK");
     let event: Stripe.Event;
-    const endpointSecret = `${config.STRIPE_WEBHOOK_SECRET}`;
 
+    // 🔐 Verifica assinatura do Stripe
     try {
       const signature = req.headers["stripe-signature"] as string;
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
-        endpointSecret,
+        config.STRIPE_WEBHOOK_SECRET,
       );
     } catch (err: any) {
-      console.error("⚠️ Webhook signature verification failed:", err.message);
+      console.error("[Webhook] Signature verification failed:", err.message);
       return res.sendStatus(400);
     }
 
-    let stripeObject;
-    let status;
-    // Handle the event
-    switch (event.type) {
-      case "customer.subscription.deleted":
-        stripeObject = event.data.object;
-        status = stripeObject.status;
-        console.log(`Subscription status is ${status}.`);
-        // Then define and call a method to handle the subscription deleted.
-        // handleSubscriptionDeleted(stripeObject);
-        break;
-      case "checkout.session.completed":
-        break;
-      // const session = event.data.object as Stripe.Checkout.Session;
-      // if (!session.metadata) {
-      //   throw new Error("[STRIPE-PAYMENT-WEBHOOK] Session does not exist");
-      // }
-      // const { studentId, userPlanId, userId } = session.metadata;
-      // const studentPlanDTO: IStudentPlan = {
-      //   studentId: studentId,
-      //   planId: userPlanId,
-      // };
-      // await createStudentPlanService(studentPlanDTO, userId);
-      // break;
+    try {
+      switch (event.type) {
+        /**
+         * ==========================================
+         * PAGAMENTOS AVULSOS (one-time)
+         * ==========================================
+         */
+        case "payment_intent.succeeded": {
+          const paymentIntent = event.data.object as Stripe.PaymentIntent | any;
 
-      case "payment_intent.succeeded": {
-        const stripeCharge = event.data.object as Stripe.PaymentIntent;
-        // console.log(stripeCharge);
+          // Ignora se for recorrente
+          if (paymentIntent.subscription) break;
 
-        const { studentId, userPlanId, userId, chargeId } =
-          stripeCharge.metadata;
-        console.log(stripeCharge.metadata);
-        if (!studentId || !userPlanId || !userId || !chargeId) {
-          console.log("[CHARGE.SUCCEEDED] Incomplete Charge Metadata");
+          const { studentId, userPlanId, userId } = paymentIntent.metadata;
+          if (!studentId || !userPlanId || !userId) break;
+
+          // Idempotência
+          const existing = await prisma.charge.findFirst({
+            where: { externalId: paymentIntent.id },
+          });
+          if (existing) break;
+
+          await prisma.$transaction(async (tx) => {
+            const charge = await createChargeService(tx, {
+              studentId,
+              status: ChargeStatus.PAID,
+              amount: paymentIntent.amount,
+              externalId: paymentIntent.id,
+              description: paymentIntent.description ?? "",
+              paidAt: new Date(),
+            });
+
+            const studentPlan = await createStudentPlanService(
+              tx,
+              { studentId, planId: userPlanId },
+              userId,
+            );
+
+            await tx.charge.update({
+              where: { id: charge.id },
+              data: { studentPlanId: studentPlan.id },
+            });
+          });
+
           break;
         }
 
-        const charge = await prisma.charge.findUnique({
-          where: { id: chargeId },
-        });
+        /**
+         * ==========================================
+         * ASSINATURA CRIADA (primeiro pagamento)
+         * ==========================================
+         */
+        case "customer.subscription.created": {
+          const subscription = event.data.object as Stripe.Subscription;
 
-        if (!charge || charge.status === ChargeStatus.PAID) {
-          break; // Duplicate Webhook or invalid Charge
+          const { studentId, userPlanId, userId } = subscription.metadata || {};
+          if (!studentId || !userPlanId || !userId) break;
+
+          // Idempotência
+          const existing = await prisma.charge.findFirst({
+            where: { externalId: subscription.id },
+          });
+          if (existing) break;
+
+          // Cria charge inicial
+          await prisma.$transaction(async (tx) => {
+            await createChargeService(tx, {
+              studentId,
+              status:
+                subscription.status === "active"
+                  ? ChargeStatus.PAID
+                  : ChargeStatus.PENDING,
+              amount: subscription.items.data[0].price.unit_amount ?? 0,
+              externalId: subscription.id,
+              description: "Assinatura inicial",
+              paidAt: subscription.status === "active" ? new Date() : undefined,
+            });
+
+            await createStudentPlanService(
+              tx,
+              { studentId, planId: userPlanId },
+              userId,
+            );
+          });
+
+          break;
         }
 
-        await prisma.$transaction(async (tx) => {
-          const studentPlan = await createStudentPlanService(
-            tx,
-            {
+        /**
+         * ==========================================
+         * ASSINATURA RENOVAÇÃO (invoice pago)
+         * ==========================================
+         */
+        case "invoice.paid": {
+          const invoice = event.data.object as Stripe.Invoice | any;
+
+          // Se não for assinatura, ignora
+          if (
+            !invoice.subscription ||
+            typeof invoice.subscription !== "string"
+          ) {
+            console.log(
+              "[Webhook] Invoice has no subscription, ignoring:",
+              invoice.id,
+            );
+            break;
+          }
+
+          // Procura charge pendente
+          const charge = await prisma.charge.findFirst({
+            where: { externalId: invoice.id, status: ChargeStatus.PENDING },
+          });
+          if (!charge) {
+            console.log(
+              "[Webhook] Pending charge not found for invoice:",
+              invoice.id,
+            );
+            break;
+          }
+
+          // Recupera subscription para metadata
+          const subscription = await stripe.subscriptions.retrieve(
+            invoice.subscription,
+          );
+          const { studentId, userPlanId, userId } = subscription.metadata || {};
+          if (!studentId || !userPlanId || !userId) {
+            console.log(
+              "[Webhook] Subscription metadata missing, ignoring invoice:",
+              invoice.id,
+            );
+            break;
+          }
+
+          await prisma.$transaction(async (tx) => {
+            await markChargePaidService(tx, {
+              chargeId: charge.id,
+              externalId: charge.externalId!,
+              studentPlanId: charge.studentPlanId!,
+            });
+
+            // await createStudentPlanService(
+            //   tx,
+            //   { studentId, planId: userPlanId },
+            //   userId,
+            // );
+          });
+
+          break;
+        }
+
+        /**
+         * ==========================================
+         * PAGAMENTO RECORRENTE FALHOU
+         * ==========================================
+         */
+        case "invoice.payment_failed": {
+          const invoice = event.data.object as Stripe.Invoice;
+          console.log("[Webhook] Recurring payment failed:", invoice.id);
+
+          // Aqui você pode marcar studentPlan/charge como PAST_DUE
+          break;
+        }
+
+        /**
+         * ==========================================
+         * ASSINATURA CANCELADA
+         * ==========================================
+         */
+        case "customer.subscription.deleted": {
+          const subscription = event.data.object as Stripe.Subscription;
+          console.log("[Webhook] Subscription canceled:", subscription.id);
+
+          const { studentId, userPlanId, userId } = subscription.metadata || {};
+          if (!studentId || !userPlanId || !userId) {
+            console.log(
+              "[CONNECT-Webhook] Missing subscription metadata, ignoring",
+            );
+            break;
+          }
+
+          // Busca o plano ativo do aluno
+          const activeStudentPlan = await prisma.studentPlan.findFirst({
+            where: {
               studentId,
               planId: userPlanId,
+              status: "ACTIVE", // ou StudentPlanStatus.ACTIVE
+              endDate: { gte: new Date() }, // planos ainda ativos
             },
-            userId,
-          );
-          console.log(studentPlan.id);
-
-          await markChargePaidService(tx, {
-            chargeId,
-            externalId: stripeCharge.id,
-            paidAt: new Date(),
-            studentPlanId: studentPlan.id,
+            select: { id: true },
           });
-        });
-        break;
+
+          if (!activeStudentPlan) {
+            console.log(
+              `[CONNECT-Webhook] No active studentPlan found for student ${studentId}`,
+            );
+            break;
+          }
+
+          // Cancela o plano
+          await prisma.$transaction(async (tx) => {
+            await cancelStudentPlanService(tx, activeStudentPlan.id, userId);
+          });
+
+          console.log(
+            `[CONNECT-Webhook] StudentPlan ${activeStudentPlan.id} canceled successfully`,
+          );
+          break;
+        }
+
+        default:
+          console.log(
+            "[CONNECT-Webhook] Event received but ignored:",
+            event.type,
+          );
       }
 
-      case "checkout.session.async_payment_failed":
-        stripeObject = event.data.object;
-        status = stripeObject.status;
-        console.log(`Checkout Session status is ${status}.`);
-        // Then define and call a method to handle the subscription deleted.
-        // handleCheckoutSessionFailed(stripeObject);
-        break;
-
-      default:
-        // Unexpected event type
-        console.log(`Unhandled event type ${event.type}.`);
+      return res.sendStatus(200);
+    } catch (err) {
+      console.error("[Webhook] Error:", err);
+      return res.sendStatus(500);
     }
-    // Return a 200 response to acknowledge receipt of the event
-    res.send();
   },
 );
 

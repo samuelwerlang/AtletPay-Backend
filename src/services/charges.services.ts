@@ -2,46 +2,34 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { ChargeStatus } from "@prisma/client";
 
-interface ICreateCharge {
-  studentId: string; // aluno que vai pagar
-  amount: number; // em centavos
+interface ICharge {
+  studentId: string;
+  status: ChargeStatus; // aluno que vai pagar
+  amount: number;
+  externalId: string; // cents
   description?: string;
+  paidAt?: Date;
 }
 
 interface IUpdateChargePayment {
   chargeId: string;
   studentPlanId?: string;
   externalId: string; // id do Stripe
-  paidAt: Date;
 }
 
 async function createChargeService(
   tx: Prisma.TransactionClient,
-  data: ICreateCharge,
+  data: ICharge,
 ) {
-  const { studentId, amount, description } = data;
-
-  // Check if the student already has an open or paid charge
-  const existingCharge = await tx.charge.findFirst({
-    where: {
-      studentId,
-      status: {
-        in: [ChargeStatus.PENDING, ChargeStatus.PAID],
-      },
-    },
-    select: { id: true },
-  });
-
-  if (existingCharge) {
-    throw new Error("Student already has an active charge");
-  }
+  const { studentId, amount, description, status, externalId } = data;
 
   return tx.charge.create({
     data: {
       studentId,
       amount,
       description,
-      status: ChargeStatus.PENDING,
+      externalId,
+      status,
     },
   });
 }
@@ -50,14 +38,14 @@ async function markChargePaidService(
   tx: Prisma.TransactionClient,
   data: IUpdateChargePayment,
 ) {
-  const { chargeId, externalId, paidAt, studentPlanId } = data;
+  const { chargeId, externalId, studentPlanId } = data;
 
   return await tx.charge.update({
     where: { id: chargeId },
     data: {
       status: ChargeStatus.PAID,
+      paidAt: new Date(),
       externalId,
-      paidAt,
       studentPlanId,
     },
   });

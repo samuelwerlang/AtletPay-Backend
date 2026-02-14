@@ -8,9 +8,15 @@ export async function getCurrentUser(
 ) {
   const auth0Id = req.auth!.payload.sub;
 
-  const user = await prisma.user.findUniqueOrThrow({
+  const user = await prisma.user.findUnique({
     where: { auth0Id },
   });
+
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
 
   res.locals.user = user;
   return next();

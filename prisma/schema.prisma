@@ -97,7 +97,7 @@ model UserPlan {
   name             String
   price            Int
   sessionsPerWeek  Int
-  durationInWeeks  Int
+  durationInMonths  Int
 
   stripeAccountId  String   // Stripe Connect
   stripeProductId  String
@@ -105,6 +105,8 @@ model UserPlan {
 
   description      String
   isActive         Boolean  @default(true)
+  isRecurrent      Boolean  @default(false)
+  intervalType   UserPlanRecurringIntervalType? // para planos recorrentes
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
@@ -221,4 +223,12 @@ enum EXPENSE_CATEGORY {
   TRANSPORTATION
   FEEDING
   OTHERS
+}
+
+enum UserPlanRecurringIntervalType {
+  MONTHLY
+  BIMONTHLY
+  TRIMONTHLY
+  SEMIANNUALLY
+  ANUALLY
 }

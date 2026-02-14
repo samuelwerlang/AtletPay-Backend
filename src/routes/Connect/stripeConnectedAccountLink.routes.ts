@@ -1,11 +1,11 @@
-import config from "../config/config.js";
+import config from "../../config/config.js";
 import express from "express";
 import { Request, Response, Router } from "express";
 import Stripe from "stripe";
-import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
-import requireAuth from "../middlewares/checkAuth.middleware.js";
-import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
-import { IUserData, updateUserService } from "../services/users.service.js";
+import { jwtCheck } from "../../middlewares/jwtCheck.middleware.js";
+import requireAuth from "../../middlewares/checkAuth.middleware.js";
+import getCurrentUser from "../../middlewares/getCurrentUser.middleware.js";
+import { IUserData, updateUserService } from "../../services/users.service.js";
 
 const router: Router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);

@@ -1,15 +1,20 @@
 import config from "../config/config.js";
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
-import { createProductWithPriceService } from "./StripeServices/stripeCreateProductwithPrice.services.js";
+import { UserPlanRecurringIntervalType } from "@prisma/client";
+import {
+  createRecurrentProductService,
+  createOneTimeProductService,
+} from "./StripeServices/stripeCreateProductwithPrice.services.js";
 
-const stripe = new Stripe(`${config.STRIPE_API_KEY}`);
 interface IPlanInfo {
   name: string;
   price: number;
   description: string;
-  durationInWeeks: number;
+  durationInMonths: number;
   sessionsPerWeek: number;
+  isRecurrent: boolean;
+  intervalType?: UserPlanRecurringIntervalType;
 }
 
 async function createUserPlanService(
@@ -17,8 +22,15 @@ async function createUserPlanService(
   userId: string,
   stripeAccountId: string,
 ) {
-  const { name, price, description, durationInWeeks, sessionsPerWeek } =
-    planInfo;
+  const {
+    name,
+    price,
+    description,
+    durationInMonths,
+    sessionsPerWeek,
+    isRecurrent,
+    intervalType,
+  } = planInfo;
 
   const existingPlan = await prisma.userPlan.findFirst({
     where: {
@@ -30,12 +42,59 @@ async function createUserPlanService(
   if (existingPlan) {
     throw new Error("Plan with this name already exists");
   }
-  const { productId, priceId } = await createProductWithPriceService({
+
+  let intervalCount;
+  if (isRecurrent && intervalType) {
+    switch (intervalType) {
+      case UserPlanRecurringIntervalType.MONTHLY:
+        intervalCount = 1;
+        break;
+      case UserPlanRecurringIntervalType.BIMONTHLY:
+        intervalCount = 2;
+        break;
+      case UserPlanRecurringIntervalType.TRIMONTHLY:
+        intervalCount = 3;
+        break;
+      case UserPlanRecurringIntervalType.SEMIANNUALLY:
+        intervalCount = 6;
+        break;
+      case UserPlanRecurringIntervalType.ANUALLY:
+        intervalCount = 12;
+        break;
+    }
+
+    const { productId, priceId } = await createRecurrentProductService({
+      name,
+      description,
+      unitAmount: price,
+      currency: "brl",
+      stripeAccountId,
+      intervalCount: intervalCount,
+    });
+    return prisma.userPlan.create({
+      data: {
+        name,
+        price,
+        description,
+        durationInMonths: intervalCount!,
+        sessionsPerWeek,
+        userId,
+        isRecurrent,
+        intervalType: intervalType,
+        stripeProductId: productId,
+        stripePriceId: priceId,
+        stripeAccountId: stripeAccountId,
+      },
+    });
+  }
+
+  const { productId, priceId } = await createOneTimeProductService({
     name,
     description,
     unitAmount: price,
     currency: "brl",
     stripeAccountId,
+    intervalCount: intervalCount,
   });
 
   return prisma.userPlan.create({
@@ -43,9 +102,11 @@ async function createUserPlanService(
       name,
       price,
       description,
-      durationInWeeks,
+      durationInMonths,
       sessionsPerWeek,
       userId,
+      isRecurrent,
+      intervalType: intervalType,
       stripeProductId: productId,
       stripePriceId: priceId,
       stripeAccountId: stripeAccountId,

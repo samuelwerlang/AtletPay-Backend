@@ -35,26 +35,30 @@ async function createStudentPlanService(
       userId,
     },
     select: {
-      durationInWeeks: true,
+      durationInMonths: true,
       price: true,
     },
   });
 
   // Calculate end date
   const now = new Date();
-  const durationInDays = userPlan.durationInWeeks * 7;
   const studentPlanEndDate = new Date(now);
-  studentPlanEndDate.setDate(studentPlanEndDate.getDate() + durationInDays);
-
+  studentPlanEndDate.setMonth(
+    studentPlanEndDate.getMonth() + userPlan.durationInMonths,
+  );
   if (now > studentPlanEndDate) {
     throw new Error("Invalid time interval");
   }
 
   // Check if student already has an active plan
+  // Active Plan == status ACTIVE + endDate > now
   const activePlan = await tx.studentPlan.findFirst({
     where: {
       studentId,
       status: "ACTIVE",
+      endDate: {
+        gt: new Date(),
+      },
     },
     select: { id: true },
   });
@@ -78,19 +82,26 @@ async function createStudentPlanService(
 
 export default createStudentPlanService;
 
-async function cancelStudentPlanService(studentPlanId: string, userId: string) {
+async function cancelStudentPlanService(
+  tx: Prisma.TransactionClient,
+  studentPlanId: string,
+  userId: string,
+) {
   // Make sure the plan exists, is active and belong to the user
-  const studentPlan = await prisma.studentPlan.findFirstOrThrow({
+  const studentPlan = await tx.studentPlan.findFirstOrThrow({
     where: {
       id: studentPlanId,
       status: "ACTIVE",
+      endDate: {
+        gt: new Date(),
+      },
       student: {
         userId: userId,
       },
     },
   });
 
-  return prisma.studentPlan.update({
+  return tx.studentPlan.update({
     where: { id: studentPlan.id },
     data: {
       status: "INACTIVE",

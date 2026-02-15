@@ -24,7 +24,7 @@ const router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);
 
 router.post(
-  "/stripe/webhook",
+  "/webhook/stripe/platform",
   express.raw({ type: "application/json" }),
   async (request, response) => {
     const endpointSecret = `${config.STRIPE_WEBHOOK_SECRET}`;

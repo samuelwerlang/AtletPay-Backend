@@ -1,8 +1,8 @@
 import express from "express";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
-import stripeWebhook from "./routes/webHooks/stripeWebhook.routes.js";
-import stripeStudentWebhook from "./routes/webHooks/stripeStudentWebhook.routes.js";
+import stripeWebhook from "./routes/webHooks/stripePlatformWebhook.routes.js";
+import stripeStudentWebhook from "./routes/webHooks/stripeConnectWebhook.routes.js";
 import usersRouter from "./routes/me.routes.js";
 import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
@@ -32,7 +32,7 @@ app.get("/", (req, res) => {
 app.get("/callback", (req, res) => {
   res.send(`
     <h1>Login OK</h1>
-    <p>Copie o access_token da URL</p>
+    <p>Copy acess token:</p>
     <script>
     const hash = window.location.hash;
     document.body.innerHTML += "<pre>" + hash + "</pre>";

@@ -21,9 +21,9 @@ async function blockIfSubscriptionExists(
       status: {
         in: [
           SubscriptionStatus.ACTIVE,
+          SubscriptionStatus.PAST_DUE,
           SubscriptionStatus.INCOMPLETE,
           SubscriptionStatus.TRIALING,
-          SubscriptionStatus.UNPAID,
         ],
       },
     },

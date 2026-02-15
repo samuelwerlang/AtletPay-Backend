@@ -19,34 +19,6 @@ function extractStripeCustomerId(
   return typeof customerId === "string" ? customerId : customerId.id;
 }
 
-// async function createSubscriptionService(dto: SubscriptionDTO) {
-//   const stripeCustomerId = extractStripeCustomerId(dto.stripeCustomerId);
-
-//   const result = await prisma.subscription.upsert({
-//     where: { stripeSubscriptionId: dto.stripeSubscriptionId },
-//     create: {
-//       userId: dto.userId,
-//       saasPlanId: dto.saasPlanId,
-//       stripeCustomerId,
-//       stripeSubscriptionId: dto.stripeSubscriptionId,
-//       status: dto.status, // NÃO sobrescreva com ACTIVE
-//       cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? false,
-//       currentPeriodStart: dto.currentPeriodStart,
-//       currentPeriodEnd: dto.currentPeriodEnd,
-//     },
-//     update: {
-//       saasPlanId: dto.saasPlanId,
-//       stripeCustomerId,
-//       status: dto.status,
-//       cancelAtPeriodEnd: dto.cancelAtPeriodEnd ?? false,
-//       currentPeriodStart: dto.currentPeriodStart,
-//       currentPeriodEnd: dto.currentPeriodEnd,
-//     },
-//   });
-
-//   return result;
-// }
-
 async function createSubscriptionService(subscriptionData: SubscriptionDTO) {
   const createdSubscription = await prisma.$transaction(async (tx) => {
     const existingSubscription = await tx.subscription.findFirst({
@@ -75,38 +47,55 @@ async function createSubscriptionService(subscriptionData: SubscriptionDTO) {
         stripeCustomerId: extractStripeCustomerId(
           subscriptionData.stripeCustomerId,
         ),
-        status: SubscriptionStatus.ACTIVE,
+        // status: SubscriptionStatus.ACTIVE,
       },
     });
   });
   return createdSubscription;
 }
 
+// async function updateSubscriptionService(
+//   subscriptionData: SubscriptionDTO,
+//   userId: string,
+// ) {
+//   return prisma.$transaction(async (tx) => {
+//     const activeSubscription = await tx.subscription.findFirst({
+//       where: {
+//         userId,
+//         status: SubscriptionStatus.ACTIVE,
+//       },
+//     });
+
+//     if (!activeSubscription) {
+//       throw new Error("There is no active subscription for this user");
+//     }
+
+//     const updatedSubscription = await tx.subscription.update({
+//       where: {
+//         id: activeSubscription.id,
+//       },
+//       data: {
+//         ...subscriptionData,
+//       },
+//     });
+//     return updatedSubscription;
+//   });
+// }
+
 async function updateSubscriptionService(
   subscriptionData: SubscriptionDTO,
   userId: string,
 ) {
-  return prisma.$transaction(async (tx) => {
-    const activeSubscription = await tx.subscription.findFirst({
-      where: {
-        userId,
-        status: SubscriptionStatus.ACTIVE,
-      },
-    });
-
-    if (!activeSubscription) {
-      throw new Error("There is no active subscription for this user");
-    }
-
-    const updatedSubscription = await tx.subscription.update({
-      where: {
-        id: activeSubscription.id,
-      },
-      data: {
-        ...subscriptionData,
-      },
-    });
-    return updatedSubscription;
+  return prisma.subscription.upsert({
+    where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
+    update: { ...subscriptionData },
+    create: {
+      ...subscriptionData,
+      stripeCustomerId: extractStripeCustomerId(
+        subscriptionData.stripeCustomerId,
+      ),
+      // status vem do subscriptionData.status
+    },
   });
 }
 

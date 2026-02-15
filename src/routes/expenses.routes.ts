@@ -8,6 +8,7 @@ import {
 } from "../controllers/expenses.controller.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
 import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
+import checkSaasSubscription from "../middlewares/checkSaasSubscription.middleware.js";
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   getAllExpensesController,
 );
 router.get(
@@ -24,6 +26,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   getExpenseByIdController,
 );
 router.post(
@@ -31,6 +34,7 @@ router.post(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   createExpenseController,
 );
 

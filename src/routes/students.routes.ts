@@ -27,6 +27,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   getAllStudentsController,
 );
 router.get(
@@ -34,6 +35,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   getStudentByIdController,
 );
 router.delete(
@@ -41,6 +43,7 @@ router.delete(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   deleteStudentController,
 );
 router.patch(
@@ -48,6 +51,7 @@ router.patch(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   updateStudentController,
 );
 

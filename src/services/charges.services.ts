@@ -51,8 +51,11 @@ async function markChargePaidService(
   });
 }
 
-async function markChargeFailedService(chargeId: string) {
-  return await prisma.charge.update({
+async function markChargeFailedService(
+  tx: Prisma.TransactionClient,
+  chargeId: string,
+) {
+  return await tx.charge.update({
     where: { id: chargeId },
     data: { status: ChargeStatus.FAILED },
   });

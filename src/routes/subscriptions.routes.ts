@@ -9,9 +9,3 @@ import {
 const router = express.Router();
 
 router.post("/subscription", jwtCheck, requireAuth, createSubscriptionService);
-// router.patch(
-//   "/subscription/:id",
-//   jwtCheck,
-//   requireAuth,
-//   updateSubscriptionService,
-// );

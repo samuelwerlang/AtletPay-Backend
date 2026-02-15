@@ -2,6 +2,7 @@ import express from "express";
 import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import checkSaasSubscription from "../middlewares/checkSaasSubscription.middleware.js";
 import checkPlanLimit from "../middlewares/checkPlanLimit.middleware.js";
+import { checkStripeAccount } from "../middlewares/checkStripeAcc.middleware.js";
 import {
   createUserPlanController,
   getUserPlanController,
@@ -19,6 +20,7 @@ router.post(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStripeAccount,
   checkSaasSubscription,
   checkPlanLimit,
   createUserPlanController,
@@ -28,6 +30,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   getAllUserPlansController,
 );
 router.get(
@@ -35,6 +38,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkSaasSubscription,
   getUserPlanController,
 );
 router.patch(
@@ -42,6 +46,8 @@ router.patch(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStripeAccount,
+  checkSaasSubscription,
   updateUserPlanController,
 );
 router.delete(
@@ -49,6 +55,8 @@ router.delete(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStripeAccount,
+  checkSaasSubscription,
   deleteUserPlanController,
 );
 

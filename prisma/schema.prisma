@@ -158,7 +158,7 @@ model SaasPlan {
 
 model Subscription {
   id                   String             @id @default(uuid())
-  status               SubscriptionStatus @default(ACTIVE)
+  status               SubscriptionStatus 
   userId               String             
   cancelAtPeriodEnd    Boolean            @default(false)
   createdAt            DateTime           @default(now())
@@ -186,6 +186,7 @@ enum SaasPlanType {
 
 enum StudentPlanStatus {
   ACTIVE
+  PAST_DUE
   INACTIVE
 }
 

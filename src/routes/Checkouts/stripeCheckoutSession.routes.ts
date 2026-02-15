@@ -6,6 +6,7 @@ import getCurrentUser from "../../middlewares/getCurrentUser.middleware.js";
 import { jwtCheck } from "../../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../../middlewares/checkAuth.middleware.js";
 import { blockIfSubscriptionExists } from "../../middlewares/blockIfSubscriptionExists.middleware.js";
+import checkSaasSubscription from "../../middlewares/checkSaasSubscription.middleware.js";
 
 const router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);

@@ -44,7 +44,7 @@ async function createStudentPlanService(
   const now = new Date();
   const studentPlanEndDate = new Date(now);
   studentPlanEndDate.setMonth(
-    studentPlanEndDate.getMonth() + userPlan.durationInMonths,
+    studentPlanEndDate.getMonth() + userPlan.durationInMonths!,
   );
   if (now > studentPlanEndDate) {
     throw new Error("Invalid time interval");

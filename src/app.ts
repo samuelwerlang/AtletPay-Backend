@@ -11,7 +11,7 @@ import userPlansRouter from "./routes/userPlans.routes.js";
 import studentPlansRouter from "./routes/studentplans.routes.js";
 
 import createCheckoutSession from "./routes/Checkouts/stripeCheckoutSession.routes.js";
-import createStudentPlanCheckout from "./routes/Checkouts/stripeStudentCheckoutSession.routes.js";
+import createStudentPlanCheckout from "./routes/Checkouts/stripeConnectCheckoutSession.routes.js";
 import createPortalSession from "./routes/stripePortalSession.routes.js";
 import createConnectAccount from "./routes/Connect/stripeCreateConnectedAccount.routes.js";
 import linkConnectAccount from "./routes/Connect/stripeConnectedAccountLink.routes.js";

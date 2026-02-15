@@ -18,7 +18,7 @@ const checkoutSchema = z.object({
 });
 
 router.post(
-  "/checkout/studentplan",
+  "/checkout/connect",
   jwtCheck,
   requireAuth,
   getCurrentUser,

@@ -14,7 +14,7 @@ const userPlanSchema = z.object({
   name: z.string().min(1),
   price: z.number().positive(),
   description: z.string().min(1),
-  durationInMonths: z.number().int().positive(),
+  durationInMonths: z.number().int().positive().optional(),
   sessionsPerWeek: z.number().int().positive(),
   isRecurrent: z.boolean(),
   intervalType: z.enum(UserPlanRecurringIntervalType).optional(),

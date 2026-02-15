@@ -97,7 +97,7 @@ model UserPlan {
   name             String
   price            Int
   sessionsPerWeek  Int
-  durationInMonths  Int
+  durationInMonths  Int? //Opcional para planos não recorrentes
 
   stripeAccountId  String   // Stripe Connect
   stripeProductId  String

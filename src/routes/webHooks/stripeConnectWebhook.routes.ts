@@ -139,7 +139,10 @@ router.post(
           );
 
           const { studentId, userPlanId, userId } = subscription.metadata || {};
-          if (!studentId || !userPlanId || !userId) break;
+          if (!studentId || !userPlanId || !userId) {
+            console.log("[CONNECT-Webhook] Missing subscription metadata");
+            break;
+          }
 
           // Idempotência: uma Charge por invoice.id
           const exists = await prisma.charge.findFirst({
@@ -153,7 +156,7 @@ router.post(
             0;
 
           await prisma.$transaction(async (tx) => {
-            // Opcional: localizar o StudentPlan ativo para vincular a Charge
+            // localizar o StudentPlan ativo para vincular a Charge
             const studentPlan = await tx.studentPlan.findFirst({
               where: {
                 studentId,

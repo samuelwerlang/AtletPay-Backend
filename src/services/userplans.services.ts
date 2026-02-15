@@ -11,7 +11,7 @@ interface IPlanInfo {
   name: string;
   price: number;
   description: string;
-  durationInMonths: number;
+  durationInMonths?: number;
   sessionsPerWeek: number;
   isRecurrent: boolean;
   intervalType?: UserPlanRecurringIntervalType;

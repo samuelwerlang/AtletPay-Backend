@@ -1,7 +1,6 @@
 import config from "../config/config.js";
 import { Request, Response, NextFunction } from "express";
 import Stripe from "stripe";
-
 const stripe = new Stripe(config.STRIPE_API_KEY);
 
 async function checkStripeAccount(

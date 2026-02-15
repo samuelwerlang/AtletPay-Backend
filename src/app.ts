@@ -30,10 +30,11 @@ const limiter = rateLimit({
 const app = express();
 
 // ================ RATE LIMITER ============
-app.use(limiter);
+app.use("/api", limiter);
+
 // ================ WEBHOOKS ================
-app.use("/api", stripeWebhook);
-app.use("/api", stripeStudentWebhook);
+app.use("/webhook", stripeWebhook);
+app.use("/webhook", stripeStudentWebhook);
 // ================= MIDDLEWARES ============
 app.use(express.json());
 

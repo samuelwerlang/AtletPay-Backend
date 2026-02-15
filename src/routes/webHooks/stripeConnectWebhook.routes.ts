@@ -20,7 +20,7 @@ const stripe = new Stripe(config.STRIPE_API_KEY);
 const router: Router = express.Router();
 
 router.post(
-  "/webhook/stripe/connect",
+  "/stripe/connect",
   express.raw({ type: "application/json" }),
   async (req: Request, res: Response) => {
     let event: Stripe.Event;

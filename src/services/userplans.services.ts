@@ -5,7 +5,8 @@ import { UserPlanRecurringIntervalType } from "@prisma/client";
 import {
   createRecurrentProductService,
   createOneTimeProductService,
-} from "./StripeServices/stripeCreateProductwithPrice.services.js";
+  deleteProductService,
+} from "./StripeServices/stripeProducts.services.js";
 
 interface IPlanInfo {
   name: string;

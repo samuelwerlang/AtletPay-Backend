@@ -3,7 +3,7 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(`${config.STRIPE_API_KEY}`);
 
-interface ICreateProduct {
+interface IStripeProduct {
   name: string;
   description: string;
   unitAmount: number;
@@ -20,7 +20,7 @@ export async function createRecurrentProductService({
   currency,
   stripeAccountId,
   intervalCount,
-}: ICreateProduct) {
+}: IStripeProduct) {
   const product = await stripe.products.create(
     {
       name,
@@ -54,7 +54,7 @@ export async function createOneTimeProductService({
   unitAmount,
   currency,
   stripeAccountId,
-}: ICreateProduct) {
+}: IStripeProduct) {
   const product = await stripe.products.create(
     {
       name,
@@ -76,4 +76,36 @@ export async function createOneTimeProductService({
     productId: product.id,
     priceId: price.id,
   };
+}
+
+export async function deleteProductService(stripeProductId: string) {
+  try {
+    const deletedProduct = await stripe.products.del(stripeProductId);
+    return deletedProduct;
+  } catch (error) {
+    console.error(
+      "[DELETE-PRODUCT-SERVICE] Failed to delete Stripe product",
+      error,
+    );
+    throw error;
+  }
+}
+
+export async function updateProductService(
+  stripeProductId: string,
+  { name, description }: IStripeProduct,
+) {
+  try {
+    const updatedProduct = await stripe.products.update(stripeProductId, {
+      name,
+      description,
+    });
+    return updatedProduct;
+  } catch (error) {
+    console.error(
+      "[UPDATE-PRODUCT-SERVICE] Failed to update Stripe product",
+      error,
+    );
+    throw error;
+  }
 }

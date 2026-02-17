@@ -78,9 +78,20 @@ export async function createOneTimeProductService({
   };
 }
 
-export async function deleteProductService(stripeProductId: string) {
+export async function archiveStripeProductService(
+  stripeProductId: string,
+  stripeAccountId: string,
+) {
   try {
-    const deletedProduct = await stripe.products.del(stripeProductId);
+    const deletedProduct = await stripe.products.update(
+      stripeProductId,
+      {
+        active: false,
+      },
+      {
+        stripeAccount: stripeAccountId,
+      },
+    );
     return deletedProduct;
   } catch (error) {
     console.error(
@@ -91,20 +102,38 @@ export async function deleteProductService(stripeProductId: string) {
   }
 }
 
-export async function updateProductService(
+export async function updateStripeProductService(
   stripeProductId: string,
-  { name, description }: IStripeProduct,
+  name: string,
+  description: string,
+  stripeAccountId: string,
 ) {
+  if (!stripeProductId) {
+    throw new Error("Stripe product ID is required");
+  }
+
   try {
-    const updatedProduct = await stripe.products.update(stripeProductId, {
+    const updateParams: Stripe.ProductUpdateParams = {
       name,
       description,
-    });
+    };
+
+    const updatedProduct = await stripe.products.update(
+      stripeProductId,
+      updateParams,
+      {
+        stripeAccount: stripeAccountId,
+      },
+    );
+    console.log(
+      `[UPDATE-PRODUCT-SERVICE] Successfully updated product: ${stripeProductId}`,
+    );
+
     return updatedProduct;
-  } catch (error) {
+  } catch (error: any) {
     console.error(
-      "[UPDATE-PRODUCT-SERVICE] Failed to update Stripe product",
-      error,
+      `[UPDATE-PRODUCT-SERVICE] Failed to update Stripe product ${stripeProductId}:`,
+      error.message,
     );
     throw error;
   }

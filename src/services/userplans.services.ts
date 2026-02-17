@@ -5,7 +5,8 @@ import { UserPlanRecurringIntervalType } from "@prisma/client";
 import {
   createRecurrentProductService,
   createOneTimeProductService,
-  deleteProductService,
+  archiveStripeProductService,
+  updateStripeProductService,
 } from "./StripeServices/stripeProducts.services.js";
 
 interface IPlanInfo {
@@ -72,6 +73,7 @@ async function createUserPlanService(
       stripeAccountId,
       intervalCount: intervalCount,
     });
+
     return prisma.userPlan.create({
       data: {
         name,
@@ -118,16 +120,38 @@ async function createUserPlanService(
 async function updateUserPlanService(
   planInfo: Partial<IPlanInfo>,
   userId: string,
-  planId: string,
+  userPlanId: string,
 ) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!user) {
+    throw new Error("[UPDATE-USER-SERVICE] User not found");
+  }
+  const userPlan = await prisma.userPlan.findFirst({
+    where: {
+      id: userPlanId,
+    },
+  });
+  if (!userPlan) {
+    throw new Error("[UPDATE-USER-SERVICE] UserPlan not found");
+  }
+  const stripeProductId: string = userPlan.stripeProductId;
   const updatedUserPlan = await prisma.userPlan.updateMany({
     where: {
-      id: planId,
+      id: userPlanId,
       userId: userId,
     },
     data: planInfo,
   });
-
+  await updateStripeProductService(
+    stripeProductId,
+    userPlan.name,
+    userPlan.description,
+    user.stripeAccountId!,
+  );
   if (updatedUserPlan.count === 0) {
     throw new Error("Plan not found or not owned by user");
   }
@@ -145,13 +169,34 @@ async function getUserPlanService(planId: string, userId: string) {
 }
 
 async function deleteUserPlanService(planId: string, userId: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+  if (!user) {
+    throw new Error("[UPDATE-USER-SERVICE] User not found");
+  }
+  const userPlan = await prisma.userPlan.findFirst({
+    where: {
+      id: planId,
+    },
+  });
+  if (!userPlan) {
+    throw new Error("[DELETE-USERPLAN-SERVICE] Userplan not found");
+  }
+
+  const stripeProductId = userPlan.stripeProductId;
+  if (!stripeProductId) {
+    throw new Error("[DELETE-USERPLAN-SERVICE] stripeProductId not found");
+  }
+  await archiveStripeProductService(stripeProductId, user.stripeAccountId!);
   const result = await prisma.userPlan.deleteMany({
     where: {
       id: planId,
       userId,
     },
   });
-
   if (result.count === 0) {
     throw new Error("Plan not found or not owned by user");
   }

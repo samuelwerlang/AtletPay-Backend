@@ -8,7 +8,7 @@ import studentsRouter from "./routes/students.routes.js";
 import saasPlansRouter from "./routes/saas-plans.routes.js";
 import expensesRouter from "./routes/expenses.routes.js";
 import userPlansRouter from "./routes/userPlans.routes.js";
-import studentPlansRouter from "./routes/studentplans.routes.js";
+// import studentPlansRouter from "./routes/studentplans.routes.js";
 
 import createCheckoutSession from "./routes/Checkouts/stripeCheckoutSession.routes.js";
 import createStudentPlanCheckout from "./routes/Checkouts/stripeConnectCheckoutSession.routes.js";
@@ -60,7 +60,7 @@ app.use("/api", studentsRouter);
 app.use("/api", saasPlansRouter);
 app.use("/api", expensesRouter);
 app.use("/api", userPlansRouter);
-app.use("/api", studentPlansRouter);
+// app.use("/api", studentPlansRouter);
 app.use("/api", createCheckoutSession);
 app.use("/api", createPortalSession);
 app.use("/api", createConnectAccount);

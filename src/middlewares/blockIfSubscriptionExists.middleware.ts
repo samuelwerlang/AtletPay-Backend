@@ -26,6 +26,9 @@ async function blockIfSubscriptionExists(
           SubscriptionStatus.TRIALING,
         ],
       },
+      currentPeriodEnd: {
+        gt: new Date(),
+      },
     },
   });
 

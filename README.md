@@ -209,7 +209,7 @@ npm install
 3. Prisma:
 
 ```bash
-npx prisma migrate deploy
+npx prisma migrate dev --name init
 npx prisma generate
 ```
 

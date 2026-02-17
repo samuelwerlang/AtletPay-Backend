@@ -1,8 +1,8 @@
 # AtletPay Backend (MVP)
 
-Para recrutadores: este é o backend de um MVP para um SaaS de gerenciamento de alunos e automação de cobranças voltado a personal trainers. O foco é simplicidade, modelagem clara e endpoints essenciais para validar o produto.
+Backend de um MVP para um SaaS de gerenciamento de alunos e automação de cobranças voltado a personal trainers. O foco é simplicidade, modelagem clara e endpoints essenciais para validar o produto.
 
-Status: em desenvolvimento ativo. As principais entidades, autenticação (Auth0) e rotas iniciais já estão funcionando.
+Status: MVP funcional. Principais entidades, autenticação (Auth0), Stripe Platform (assinatura do SaaS), Stripe Connect (checkout do aluno nos planos do treinador) e webhooks estão implementados.
 
 ## Visão geral
 
@@ -11,7 +11,8 @@ Status: em desenvolvimento ativo. As principais entidades, autenticação (Auth0
   - Node.js + Express + TypeScript (ESM)
   - Prisma + PostgreSQL
   - Auth0 (JWT)
-  - Validação com Zod
+  - Zod (validação)
+  - Stripe (Platform + Connect)
 - Principais entidades:
   - User, Student, Expense, Charge, RecurringCharge
   - UserPlan (plano do treinador), StudentPlan (vínculo do aluno ao plano)
@@ -20,18 +21,34 @@ Status: em desenvolvimento ativo. As principais entidades, autenticação (Auth0
 ## Funcionalidades (MVP)
 
 Implementadas:
-- Autenticação via Auth0 (JWT) e proteção por middleware.
-- CRUD básico de alunos (Student).
+
+- Autenticação via Auth0 (JWT) com proteção por middleware.
+- CRUD de alunos (Student).
 - CRUD de despesas (Expense).
 - Criação de planos do SaaS (SaasPlan) — restrito a ADMIN.
-- CRUD de planos do treinador (UserPlan) e listagem.
-- Tratamento de erros centralizado (Prisma/Zod).
+- CRUD de planos do treinador (UserPlan).
+- Stripe Platform:
+  - Checkout de assinatura do SaaS (`/api/create-checkout-session`).
+  - Webhook de plataforma (atualiza `stripeCustomerId` e sincroniza `Subscription`).
+  - Billing Portal (`/api/create-portal-session`).
+- Stripe Connect:
+  - Criação e onboarding de conta conectada do treinador:
+    - `/api/create-connect-account`
+    - `/api/create-account-link`
+  - Checkout para o aluno comprar um UserPlan:
+    - `/api/checkout/connect` (subscription ou payment, conforme o price)
+  - Webhook de Connect:
+    - Pagamentos avulsos: cria `Charge` e vincula `StudentPlan`.
+    - Assinatura criada: cria `StudentPlan`.
+    - Fatura criada: cria `Charge` PENDING por ciclo (externalId = invoice.id).
+    - Pagamento de fatura efetuado: marca `Charge` como PAID, mantém plano ativo.
+    - Pagamento de fatura falhou: marca `Charge` como FAILED/PAST_DUE e atualiza status do `StudentPlan`.
+    - Assinatura cancelada: cancela `StudentPlan`.
 
 Em progresso / Próximas:
-- Vinculação de StudentPlan com cálculo automático de datas.
-- Cobranças e recorrências (Charge/RecurringCharge).
-- Integração com gateway de pagamento (Stripe/Mercado Pago/Asaas) e webhooks.
-- Fluxo de Subscription do SaaS com limites (maxStudents/maxPlans).
+
+- Testes Automatizados (Jest).
+- Documentação OpenAPI/Swagger.
 
 ## Endpoints principais
 
@@ -66,13 +83,27 @@ Observação: todos os endpoints abaixo exigem Bearer token (Auth0) e passam pel
 - Planos do SaaS (SaasPlan) — ADMIN
   - POST `/api/saasplan`
 
-### Exemplos (curl)
+- Stripe Platform (SaaS)
+  - POST `/api/create-checkout-session` — cria checkout de assinatura do SaaS (usa `lookup_key` do Price).
+  - POST `/api/create-portal-session` — redireciona para Billing Portal do usuário.
 
-Substitua `TOKEN` pelo Bearer token do Auth0.
+- Stripe Connect (Treinador/Alunos)
+  - POST `/api/create-connect-account` — cria conta conectada do treinador.
+  - POST `/api/create-account-link` — cria link de onboarding.
+  - POST `/api/checkout/connect` — cria checkout para o aluno comprar um `UserPlan` (subscription ou payment).
+
+- Webhooks (sem Auth; corpo bruto)
+  - POST `/webhook/stripe/platform` — eventos de Platform (SaaS).
+  - POST `/webhook/stripe/connect` — eventos de Connect (alunos/planos do treinador).
+
+## Exemplos (curl)
+
+Substitua `TOKEN` pelo Bearer token do Auth0 e `<BASE_URL>` pela URL da API.
 
 Criar plano do treinador:
+
 ```bash
-curl -X POST https://<base-url>/api/plan \
+curl -X POST <BASE_URL>/api/plan \
   -H "Authorization: Bearer TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -85,90 +116,146 @@ curl -X POST https://<base-url>/api/plan \
 ```
 
 Listar planos do treinador:
+
 ```bash
-curl -H "Authorization: Bearer TOKEN" https://<base-url>/api/plans
+curl -H "Authorization: Bearer TOKEN" <BASE_URL>/api/plans
 ```
 
 Criar aluno:
+
 ```bash
-curl -X POST https://<base-url>/api/student \
+curl -X POST <BASE_URL>/api/student \
   -H "Authorization: Bearer TOKEN" \
   -H "Content-Type: application/json" \
   -d '{ "name": "João", "email": "joao@example.com", "phone": "11999999999" }'
 ```
 
-Criar despesa:
+Despesas:
+
 ```bash
-curl -X POST https://<base-url>/api/expense \
+curl -X POST <BASE_URL>/api/expense \
   -H "Authorization: Bearer TOKEN" \
   -H "Content-Type: application/json" \
   -d '{ "name": "Anilha", "amount": 250, "date": "2026-01-15", "category": "EQUIPMENT" }'
 ```
 
+Checkout — assinatura do SaaS (Platform):
+
+```bash
+curl -X POST <BASE_URL>/api/create-checkout-session \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "lookup_key": "BASIC_PLAN" }'
+```
+
+Billing Portal (Platform):
+
+```bash
+curl -X POST <BASE_URL>/api/create-portal-session \
+  -H "Authorization: Bearer TOKEN"
+```
+
+Criar conta Connect:
+
+```bash
+curl -X POST <BASE_URL>/api/create-connect-account \
+  -H "Authorization: Bearer TOKEN"
+```
+
+Onboarding link da conta Connect:
+
+```bash
+curl -X POST <BASE_URL>/api/create-account-link \
+  -H "Authorization: Bearer TOKEN"
+```
+
+Checkout — aluno compra `UserPlan` (Connect):
+
+```bash
+curl -X POST <BASE_URL>/api/checkout/connect \
+  -H "Authorization: Bearer TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{ "studentId": "UUID_DO_ALUNO", "userPlanId": "UUID_DO_PLANO" }'
+```
+
 ## Como rodar localmente
 
 Pré-requisitos:
+
 - Node 18+
 - PostgreSQL acessível
 - Conta/tenant no Auth0 (audience, issuer, etc.)
+- Conta Stripe e configuração dos endpoints de webhook
 
-1) Clone e instale:
+1. Instalação:
+
 ```bash
 npm install
 ```
 
-2) Configure `.env` (veja variáveis abaixo).
+2. Configurar `.env`:
 
-3) Prisma:
+- `PORT` — porta do servidor (ex.: 8080)
+- `DATABASE_URL` — conexão Postgres
+- `SECRET` — segredo opcional
+- `AUDIENCE` — Auth0 audience
+- `BASE_URL` — base URL pública do backend (p/ redirects)
+- `ISSUER_BASE_URL` — Auth0 issuer (ex.: https://YOUR-DOMAIN/)
+- `CLIENT_ID` — Auth0 client id
+- `STRIPE_API_KEY` — chave secreta da Stripe
+- `STRIPE_WEBHOOK_SECRET` — secret do endpoint de webhook configurado
+- (Opcional recomendado) `STRIPE_CONNECT_WEBHOOK_SECRET` — secret dedicado para o endpoint de Connect
+
+3. Prisma:
+
 ```bash
 npx prisma migrate deploy
 npx prisma generate
 ```
 
-4) Desenvolvimento:
-- Recomendo usar `tsx`:
+4. Desenvolvimento:
+
 ```bash
 npm run dev   # tsx watch src/server.ts
 ```
 
-5) Produção:
+5. Produção:
+
 ```bash
 npm run build
 npm start     # node build/server.js
 ```
 
-## Variáveis de ambiente (.env)
+## Webhooks na Stripe
 
-- `PORT` — porta do servidor (ex.: 8080)
-- `DATABASE_URL` — conexão Postgres (ex.: postgres://user:pass@host:5432/db)
-- `SECRET` — segredo opcional de app
-- `AUDIENCE` — audience do Auth0
-- `BASE_URL` — base URL pública do backend (string)
-- `ISSUER_BASE_URL` — issuer do Auth0 (ex.: https://YOUR-DOMAIN/)
-- `CLIENT_ID` — client id (Auth0)
+- Configure os endpoints:
+  - Platform (SaaS): `POST <BASE_URL>/webhook/stripe/platform`
+  - Connect (contas conectadas): `POST <BASE_URL>/webhook/stripe/connect`
+- Use e verifique o `STRIPE_WEBHOOK_SECRET` (e idealmente um secret dedicado para Connect).
+- Os webhooks usam `express.raw({ type: "application/json" })` para validação de assinatura.
 
 ## Arquitetura
 
 - `src/app.ts` — setup do Express (middlewares/routers)
 - `src/server.ts` — bootstrap do servidor
-- `src/middlewares` — `jwtCheck`, `requireAuth`, `requireAdmin`, `errorMiddleware`
-- `src/controllers` — orquestram validações (Zod), o usuário autenticado e chamam serviços
-- `src/services` — lógica de negócios e acesso ao Prisma
-- `src/lib/prisma.ts` — inicializa Prisma com adapter-pg
-- `prisma/schema.prisma` — modelagem completa
+- `src/middlewares` — `jwtCheck`, `requireAuth`, `requireAdmin`, `errorMiddleware`, `checkSaasSubscription`, `blockIfSubscriptionExists`, `checkStripeAcc`
+- `src/controllers` — validação (Zod), usuário autenticado, chama serviços
+- `src/services` — regras de negócio (Prisma e Stripe)
+- `src/routes` ��� agrupamento de rotas (API, Checkouts, Connect, Webhooks)
+- `prisma/schema.prisma` — modelagem
 
 ## Qualidade e segurança
 
-- Validação de entrada com Zod.
-- Tratamento padronizado de erros (Prisma/Zod/Erro genérico).
+- Validações com Zod.
+- Tratamento padronizado de erros (Prisma/Zod).
 - Proteção de rotas com JWT (Auth0).
-- Princípio de “scoped access”: operações sempre verificam o `userId` do autenticado.
+- Rate limiting com `express-rate-limit`.
+- Acesso “scoped”: operações verificam `userId` do autenticado.
+- Idempotência em cobranças via `externalId` (e.g., `invoice.id`).
 
 ## Roadmap resumido
 
-- Automação de cobranças (geração de `Charge` a partir de `StudentPlan`).
-- Integração com gateway (Stripe/Mercado Pago/Asaas) e webhooks.
-- Fluxo de Subscription do SaaS com limites por plano.
+- Melhorar idempotência e logs nos webhooks.
 - Documentação OpenAPI/Swagger.
 
 ## Contribuição
@@ -178,4 +265,4 @@ npm start     # node build/server.js
 
 ## Licença
 
-Este projeto é disponibilizado como MVP para avaliação técnica. Licença a definir.
+- MVP para avaliação técnica. Licença a definir.

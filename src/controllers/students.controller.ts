@@ -7,6 +7,7 @@ import {
   getStudentByIdService,
   getAllStudentsService,
   updateStudentService,
+  getActiveStudentsService,
 } from "../services/students.services.js";
 
 const studentSchema = z.object({
@@ -102,6 +103,17 @@ async function getStudentByIdController(req: Request, res: Response) {
   }
   const student = await getStudentByIdService(user.id, studentId);
   return res.status(200).json(student);
+}
+
+export async function getActiveStudentsController(req: Request, res: Response) {
+  const user = res.locals.user;
+  if (!user?.id) {
+    return res
+      .status(401)
+      .json({ message: "User not loaded in request context" });
+  }
+  const students = await getActiveStudentsService(user.id);
+  return res.status(200).json(students);
 }
 
 export {

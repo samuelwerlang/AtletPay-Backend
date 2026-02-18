@@ -1,3 +1,4 @@
+import { StudentPlanStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
@@ -107,6 +108,33 @@ async function deleteStudentService(userId: string, studentId: string) {
       name: true,
       email: true,
       phone: true,
+    },
+  });
+}
+
+export async function getActiveStudentsService(userId: string) {
+  const now = new Date();
+  return prisma.student.findMany({
+    where: {
+      userId,
+      studentPlans: {
+        some: {
+          status: StudentPlanStatus.ACTIVE,
+          endDate: { gt: now },
+        },
+      },
+    },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      phone: true,
+      // opcional: retornar info do plano ativo para mostrar validade
+      studentPlans: {
+        where: { status: StudentPlanStatus.ACTIVE, endDate: { gt: now } },
+        select: { id: true, startDate: true, endDate: true, status: true },
+      },
     },
   });
 }

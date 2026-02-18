@@ -5,6 +5,7 @@ import {
   getStudentByIdController,
   getAllStudentsController,
   updateStudentController,
+  getActiveStudentsController,
 } from "../controllers/students.controller.js";
 import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
@@ -30,6 +31,16 @@ router.get(
   checkSaasSubscription,
   getAllStudentsController,
 );
+
+router.get(
+  "/students/active",
+  jwtCheck,
+  requireAuth,
+  getCurrentUser,
+  checkSaasSubscription,
+  getActiveStudentsController,
+);
+
 router.get(
   "/student/:studentId",
   jwtCheck,

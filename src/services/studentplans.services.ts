@@ -50,12 +50,22 @@ async function createStudentPlanService(
     throw new Error("Invalid time interval");
   }
 
+  // Make sure to update Old StudentPlans
+  await tx.studentPlan.updateMany({
+    where: {
+      studentId,
+      status: StudentPlanStatus.ACTIVE, // depois: "CURRENT"
+      endDate: { lte: now },
+    },
+    data: { status: StudentPlanStatus.INACTIVE },
+  });
+
   // Check if student already has an active plan
   // Active Plan == status ACTIVE + endDate > now
   const activePlan = await tx.studentPlan.findFirst({
     where: {
       studentId,
-      status: "ACTIVE",
+      status: StudentPlanStatus.ACTIVE,
       endDate: {
         gt: new Date(),
       },
@@ -91,7 +101,7 @@ async function cancelStudentPlanService(
   const studentPlan = await tx.studentPlan.findFirstOrThrow({
     where: {
       id: studentPlanId,
-      status: "ACTIVE",
+      status: StudentPlanStatus.ACTIVE,
       endDate: {
         gt: new Date(),
       },
@@ -104,7 +114,7 @@ async function cancelStudentPlanService(
   return tx.studentPlan.update({
     where: { id: studentPlan.id },
     data: {
-      status: "INACTIVE",
+      status: StudentPlanStatus.ACTIVE,
       endDate: new Date(),
     },
   });

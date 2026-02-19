@@ -12,7 +12,9 @@
     "build": "tsc",
     "prisma:g": "prisma generate",
     "prisma:m": "prisma migrate dev",
-    "prisma:st": "prisma studio"
+    "prisma:st": "prisma studio",
+    "stripe:listen/platform": "stripe listen --forward-to http://localhost:8080/webhook/stripe/platform",
+    "stripe:listen/connect": "stripe listen --forward-to http://localhost:8080/webhook/stripe/connect"
   },
   "author": "Samuel Werlang",
   "license": "ISC",

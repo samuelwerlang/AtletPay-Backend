@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 import { StudentPlanStatus } from "@prisma/client";
+import { recomputeStudentActiveFlag } from "./students.services.js";
 
 export interface IStudentPlan {
   studentId: string;
@@ -67,7 +68,7 @@ async function createStudentPlanService(
       studentId,
       status: StudentPlanStatus.ACTIVE,
       endDate: {
-        gt: new Date(),
+        gt: now,
       },
     },
     select: { id: true },
@@ -78,7 +79,7 @@ async function createStudentPlanService(
   }
 
   // Create plan as ACTIVE
-  return tx.studentPlan.create({
+  const createdStudentPlan = await tx.studentPlan.create({
     data: {
       studentId,
       planId,
@@ -88,9 +89,10 @@ async function createStudentPlanService(
       status: StudentPlanStatus.ACTIVE,
     },
   });
+  //Update Student isActive Flag
+  await recomputeStudentActiveFlag(tx, studentId);
+  return createdStudentPlan;
 }
-
-export default createStudentPlanService;
 
 async function cancelStudentPlanService(
   tx: Prisma.TransactionClient,
@@ -111,13 +113,16 @@ async function cancelStudentPlanService(
     },
   });
 
-  return tx.studentPlan.update({
+  const updatedStudentPlan = await tx.studentPlan.update({
     where: { id: studentPlan.id },
     data: {
-      status: StudentPlanStatus.ACTIVE,
+      status: StudentPlanStatus.INACTIVE,
       endDate: new Date(),
     },
   });
+  // Recompute the student flag
+  await recomputeStudentActiveFlag(tx, studentPlan.studentId);
+  return updatedStudentPlan;
 }
 
 export { createStudentPlanService, cancelStudentPlanService };

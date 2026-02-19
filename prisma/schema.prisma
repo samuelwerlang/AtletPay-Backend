@@ -26,9 +26,10 @@ model Student {
   id               String            @id @default(uuid())
   email            String?
   phone            String?
+  name             String
+  isActive         Boolean           @default(false)
   updatedAt        DateTime          @updatedAt
   createdAt        DateTime          @default(now())
-  name             String
   userId           String
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   studentPlans            StudentPlan[]
@@ -68,29 +69,6 @@ model Charge {
   @@index([studentPlanId])
   @@index([studentId])
 }
-
-// model RecurringCharge {
-//   id             String           @id @default(uuid())
-//   amount         Int              // em centavos (minor units)
-//   currency       String           @default("BRL")
-//   interval       BillingInterval  @default(MONTHLY)
-//   startDate      DateTime         // início da recorrência
-//   nextRunAt      DateTime         // próxima geração de cobrança
-//   lastRunAt      DateTime?        // última execução
-//   anchorDayOfMonth Int?           // opcional: para ciclos mensais (ex.: dia 15)
-//   status         RecurringStatus  @default(ACTIVE)
-
-//   studentPlanId  String
-//   studentId      String           // denormalizado para filtros
-
-//   createdAt      DateTime         @default(now())
-//   updatedAt      DateTime         @updatedAt
-
-//   studentPlan    StudentPlan      @relation(fields: [studentPlanId], references: [id], onDelete: Cascade)
-
-//   @@index([studentPlanId])
-//   @@index([studentId])
-// }
 
 model UserPlan {
   id               String   @id @default(uuid())

@@ -23,7 +23,7 @@ router.post(
 
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: user.stripeCustomerId,
-      return_url: config.baseurl,
+      return_url: `${config.baseurl}/callback`,
       locale: "pt-BR",
     });
 

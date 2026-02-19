@@ -1,4 +1,4 @@
-import { StudentPlanStatus } from "@prisma/client";
+import { StudentPlanStatus, SubscriptionStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
@@ -11,7 +11,6 @@ interface IStudent {
 type saasPlan = { maxStudents?: number };
 
 async function createStudentService(data: IStudent, saasPlan?: saasPlan) {
-  // Defesa em profundidade: checagem do limite dentro de uma transação
   if (saasPlan?.maxStudents) {
     return prisma.$transaction(async (tx) => {
       const count = await tx.student.count({ where: { userId: data.userId } });
@@ -112,7 +111,27 @@ async function deleteStudentService(userId: string, studentId: string) {
   });
 }
 
-export async function getActiveStudentsService(userId: string) {
+import { Prisma } from "@prisma/client";
+
+async function recomputeStudentActiveFlag(
+  tx: Prisma.TransactionClient,
+  studentId: string,
+) {
+  const now = new Date();
+  const hasCurrent = await tx.studentPlan.count({
+    where: {
+      studentId,
+      status: SubscriptionStatus.ACTIVE,
+      endDate: { gt: now },
+    },
+  });
+  await tx.student.update({
+    where: { id: studentId },
+    data: { isActive: hasCurrent > 0 },
+  });
+}
+
+async function getActiveStudentsService(userId: string) {
   const now = new Date();
   return prisma.student.findMany({
     where: {
@@ -145,4 +164,6 @@ export {
   getAllStudentsService,
   updateStudentService,
   deleteStudentService,
+  recomputeStudentActiveFlag,
+  getActiveStudentsService,
 };

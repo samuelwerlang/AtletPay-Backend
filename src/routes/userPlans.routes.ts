@@ -16,7 +16,7 @@ import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
 const router = express.Router();
 
 router.post(
-  "/plan",
+  "/userplan",
   jwtCheck,
   requireAuth,
   getCurrentUser,
@@ -26,7 +26,7 @@ router.post(
   createUserPlanController,
 );
 router.get(
-  "/plans",
+  "/userplans",
   jwtCheck,
   requireAuth,
   getCurrentUser,
@@ -34,7 +34,7 @@ router.get(
   getAllUserPlansController,
 );
 router.get(
-  "/plan/:id",
+  "/userplan/:id",
   jwtCheck,
   requireAuth,
   getCurrentUser,
@@ -42,7 +42,7 @@ router.get(
   getUserPlanController,
 );
 router.patch(
-  "/plan/:id",
+  "/userplan/:id",
   jwtCheck,
   requireAuth,
   getCurrentUser,
@@ -51,7 +51,7 @@ router.patch(
   updateUserPlanController,
 );
 router.delete(
-  "/plan/:id",
+  "/userplan/:id",
   jwtCheck,
   requireAuth,
   getCurrentUser,

@@ -15,6 +15,7 @@ import {
   cancelStudentPlanService,
   createStudentPlanService,
 } from "../../services/studentplans.services.js";
+import { recomputeStudentActiveFlag } from "../../services/students.services.js";
 
 const stripe = new Stripe(config.STRIPE_API_KEY);
 const router: Router = express.Router();
@@ -31,7 +32,7 @@ router.post(
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
-        // Troque para config.STRIPE_CONNECT_WEBHOOK_SECRET quando configurar um endpoint dedicado de Connect
+        // Trocar para config.STRIPE_CONNECT_WEBHOOK_SECRET quando configurar um endpoint dedicado de Connect
         config.STRIPE_WEBHOOK_SECRET,
       );
     } catch (err: any) {
@@ -78,12 +79,14 @@ router.post(
               paidAt: new Date(),
             });
 
+            // Cria StudentPlan para compra avulsa
             const studentPlan = await createStudentPlanService(
               tx,
               { studentId, planId: userPlanId },
               userId,
             );
 
+            // Vincula a Charge ao plano criado
             await tx.charge.update({
               where: { id: charge.id },
               data: { studentPlanId: studentPlan.id },
@@ -95,24 +98,19 @@ router.post(
 
         /**
          * ==========================================
-         * ASSINATURA CRIADA (vínculo do aluno ao plano)
+         * ASSINATURA CRIADA (não cria StudentPlan aqui)
          * ==========================================
-         * Não criamos Charge aqui, pois a fatura inicial ainda pode não existir.
-         * As Charges recorrentes serão criadas em invoice.created com externalId = invoice.id.
+         * No modelo de um StudentPlan por fatura paga:
+         * - NÃO criamos StudentPlan em subscription.created
+         * - O ciclo inicial será criado em invoice.paid quando a primeira fatura for paga
          */
         case "customer.subscription.created": {
           const subscription = event.data.object as Stripe.Subscription;
           const { studentId, userPlanId, userId } = subscription.metadata || {};
-          if (!studentId || !userPlanId || !userId) break;
-
-          await prisma.$transaction(async (tx) => {
-            await createStudentPlanService(
-              tx,
-              { studentId, planId: userPlanId },
-              userId,
-            );
-          });
-
+          if (!studentId || !userPlanId || !userId) {
+            console.log("[CONNECT-Webhook] Missing subscription metadata");
+          }
+          // Não cria StudentPlan aqui
           break;
         }
 
@@ -120,7 +118,9 @@ router.post(
          * ==========================================
          * ASSINATURA RENOVAÇÃO (fatura criada)
          * ==========================================
-         * Cria Charge PENDING por ciclo com externalId = invoice.id
+         * Cria Charge PENDING por ciclo com externalId = invoice.id.
+         * Não vinculamos a Charge a um StudentPlan aqui, pois o plano do ciclo será
+         * criado em invoice.paid (após confirmação do pagamento).
          */
         case "invoice.created": {
           const invoice = event.data.object as Stripe.Invoice | any;
@@ -156,24 +156,13 @@ router.post(
             0;
 
           await prisma.$transaction(async (tx) => {
-            // localizar o StudentPlan ativo para vincular a Charge
-            const studentPlan = await tx.studentPlan.findFirst({
-              where: {
-                studentId,
-                planId: userPlanId,
-                status: StudentPlanStatus.ACTIVE,
-              },
-              orderBy: { createdAt: "desc" },
-              select: { id: true },
-            });
-
             await createChargeService(tx, {
               studentId,
               status: ChargeStatus.PENDING,
               amount: unitAmount,
               externalId: invoice.id,
               description: "Fatura recorrente criada",
-              ...(studentPlan?.id ? { studentPlanId: studentPlan.id } : {}),
+              // studentPlanId será vinculado em invoice.paid
             });
           });
 
@@ -184,8 +173,11 @@ router.post(
          * ==========================================
          * ASSINATURA RENOVAÇÃO (invoice pago)
          * ==========================================
-         * Marca a Charge PENDING como PAID procurando por externalId = invoice.id
-         * Mantém fallback para a primeira cobrança caso tenha sido criada com subscription.id
+         * Marca a Charge PENDING como PAID e cria um StudentPlan novo por ciclo,
+         * inclusive no primeiro ciclo quando a primeira fatura é paga.
+         *
+         * Proteção contra ordem de eventos: se invoice.created não rodou ainda,
+         * cria a Charge aqui antes de marcar como PAID.
          */
         case "invoice.paid": {
           const invoice = event.data.object as Stripe.Invoice | any;
@@ -194,35 +186,6 @@ router.post(
           if (!invoice.subscription) {
             console.log(
               "[CONNECT-Webhook] Invoice has no subscription, ignoring:",
-              invoice.id,
-            );
-            break;
-          }
-
-          // Procura charge pendente pela invoice.id
-          let charge = await prisma.charge.findFirst({
-            where: { externalId: invoice.id, status: ChargeStatus.PENDING },
-          });
-
-          // Fallback (caso inicial tenha sido criada com subscription.id)
-          if (!charge) {
-            const subscriptionId =
-              typeof invoice.subscription === "string"
-                ? invoice.subscription
-                : invoice.subscription?.id;
-            if (subscriptionId) {
-              charge = await prisma.charge.findFirst({
-                where: {
-                  externalId: subscriptionId,
-                  status: ChargeStatus.PENDING,
-                },
-              });
-            }
-          }
-
-          if (!charge) {
-            console.log(
-              "[CONNECT-Webhook] Pending charge not found for invoice:",
               invoice.id,
             );
             break;
@@ -250,11 +213,52 @@ router.post(
             break;
           }
 
+          const unitAmount =
+            invoice.lines?.data?.[0]?.price?.unit_amount ??
+            subscription.items?.data?.[0]?.price?.unit_amount ??
+            0;
+
           await prisma.$transaction(async (tx) => {
+            // 1) Garante que a Charge existe (cria se invoice.created não rodou ainda)
+            let charge = await tx.charge.findFirst({
+              where: { externalId: invoice.id },
+            });
+
+            if (!charge) {
+              console.log(
+                "[CONNECT-Webhook] Charge not found for invoice, creating:",
+                invoice.id,
+              );
+              charge = await createChargeService(tx, {
+                studentId,
+                status: ChargeStatus.PENDING,
+                amount: unitAmount,
+                externalId: invoice.id,
+                description: "Fatura recorrente criada (via invoice.paid)",
+              });
+            }
+
+            // Se a charge já está PAID, é reentrega – apenas sai
+            if (charge.status === ChargeStatus.PAID) {
+              console.log(
+                "[CONNECT-Webhook] Charge already PAID, skipping:",
+                charge.id,
+              );
+              return;
+            }
+
+            // 2) Cria StudentPlan do ciclo (o service expira/cancela o vigente anterior)
+            const newPlan = await createStudentPlanService(
+              tx,
+              { studentId, planId: userPlanId },
+              userId,
+            );
+
+            // 3) Marca a charge como PAID e vincula ao novo plano
             await markChargePaidService(tx, {
-              chargeId: charge!.id,
-              externalId: charge!.externalId!,
-              studentPlanId: charge!.studentPlanId!,
+              chargeId: charge.id,
+              externalId: charge.externalId!,
+              studentPlanId: newPlan.id,
             });
           });
 
@@ -265,39 +269,92 @@ router.post(
          * ==========================================
          * PAGAMENTO RECORRENTE FALHOU
          * ==========================================
+         * Proteção contra ordem de eventos: se invoice.created não rodou ainda,
+         * cria a Charge aqui antes de marcar como FAILED.
          */
         case "invoice.payment_failed": {
           const invoice = event.data.object as Stripe.Invoice | any;
 
-          // Marca Charge como PAST_DUE, se existir
-          const charge = await prisma.charge.findFirst({
-            where: { externalId: invoice.id },
-          });
+          if (!invoice.subscription) break;
 
-          if (charge) {
-            await prisma.$transaction(async (tx) => {
-              try {
-                await markChargeFailedService(tx, charge.id);
-                if (charge.studentPlanId) {
+          const subscriptionId =
+            typeof invoice.subscription === "string"
+              ? invoice.subscription
+              : invoice.subscription.id;
+
+          const subscription = await stripe.subscriptions.retrieve(
+            subscriptionId,
+            {
+              ...(connectAccountId ? { stripeAccount: connectAccountId } : {}),
+            },
+          );
+
+          const { studentId, userPlanId, userId } = subscription.metadata || {};
+          if (!studentId || !userPlanId || !userId) {
+            console.log("[CONNECT-Webhook] Missing subscription metadata");
+            break;
+          }
+
+          const unitAmount =
+            invoice.lines?.data?.[0]?.price?.unit_amount ??
+            subscription.items?.data?.[0]?.price?.unit_amount ??
+            0;
+
+          await prisma.$transaction(async (tx) => {
+            // 1) Garante que a Charge existe (cria se invoice.created não rodou ainda)
+            let charge = await tx.charge.findFirst({
+              where: { externalId: invoice.id },
+            });
+
+            if (!charge) {
+              console.log(
+                "[CONNECT-Webhook] Charge not found for invoice, creating:",
+                invoice.id,
+              );
+              charge = await createChargeService(tx, {
+                studentId,
+                status: ChargeStatus.PENDING,
+                amount: unitAmount,
+                externalId: invoice.id,
+                description: "Fatura recorrente criada (via payment_failed)",
+              });
+            }
+
+            // Se já está FAILED, é reentrega – sai
+            if (charge.status === ChargeStatus.FAILED) {
+              console.log(
+                "[CONNECT-Webhook] Charge already FAILED, skipping:",
+                charge.id,
+              );
+              return;
+            }
+
+            // 2) Marca como FAILED
+            try {
+              await markChargeFailedService(tx, charge.id);
+
+              // 3) Atualiza StudentPlan para PAST_DUE e recomputa flag
+              if (charge.studentPlanId) {
+                const studentPlan = await tx.studentPlan.findFirst({
+                  where: { id: charge.studentPlanId },
+                  select: { studentId: true },
+                });
+                if (studentPlan) {
                   await tx.studentPlan.update({
                     where: { id: charge.studentPlanId },
                     data: { status: StudentPlanStatus.PAST_DUE },
                   });
+                  await recomputeStudentActiveFlag(tx, studentPlan.studentId);
                 }
-              } catch {
-                // Se o service tiver assinatura diferente, fallback simples:
-                await tx.charge.update({
-                  where: { id: charge.id },
-                  data: { status: ChargeStatus.FAILED },
-                });
               }
-            });
-          } else {
-            console.log(
-              "[CONNECT-Webhook] Charge not found for failed invoice:",
-              invoice.id,
-            );
-          }
+            } catch {
+              // Fallback simples (se assinatura diferente do service):
+              await tx.charge.update({
+                where: { id: charge.id },
+                data: { status: ChargeStatus.FAILED },
+              });
+            }
+          });
 
           break;
         }
@@ -328,7 +385,7 @@ router.post(
               studentId,
               planId: userPlanId,
               status: StudentPlanStatus.ACTIVE,
-              endDate: { gte: new Date() }, // planos ainda ativos
+              endDate: { gte: new Date() }, // planos ainda vigentes
             },
             select: { id: true },
           });

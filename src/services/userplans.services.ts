@@ -7,13 +7,13 @@ import {
   createOneTimeProductService,
   archiveStripeProductService,
   updateStripeProductService,
-} from "./StripeServices/stripeProducts.services.js";
+} from "./stripeServices/stripeProducts.services.js";
 
 interface IPlanInfo {
   name: string;
   price: number;
   description: string;
-  durationInMonths?: number;
+  durationInMonths: number;
   sessionsPerWeek: number;
   isRecurrent: boolean;
   intervalType?: UserPlanRecurringIntervalType;
@@ -91,6 +91,7 @@ async function createUserPlanService(
     });
   }
 
+  // >>>>> **Pagamentos Avulsos** <<<<<
   const { productId, priceId } = await createOneTimeProductService({
     name,
     description,

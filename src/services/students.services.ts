@@ -1,4 +1,4 @@
-import { StudentPlanStatus, SubscriptionStatus } from "@prisma/client";
+import { StudentPlanStatus } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
@@ -121,7 +121,7 @@ async function recomputeStudentActiveFlag(
   const hasCurrent = await tx.studentPlan.count({
     where: {
       studentId,
-      status: SubscriptionStatus.ACTIVE,
+      status: StudentPlanStatus.ACTIVE,
       endDate: { gt: now },
     },
   });

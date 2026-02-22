@@ -125,7 +125,6 @@ router.post(
 
             await recomputeStudentActiveFlag(tx, studentId);
           });
-
           break;
         }
 
@@ -148,6 +147,7 @@ router.post(
           });
           break;
         }
+
         case "customer.subscription.deleted": {
           const stripeSubscription = event.data.object as Stripe.Subscription;
           const { studentId, userPlanId, userId } =
@@ -265,7 +265,9 @@ router.post(
             await markChargeFailedService(tx, charge.id);
             await recomputeStudentActiveFlag(tx, studentId);
           });
+          break;
         }
+
         default:
           console.log(
             "[CONNECT-Webhook] Event received but ignored:",

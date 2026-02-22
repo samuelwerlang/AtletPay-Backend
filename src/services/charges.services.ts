@@ -62,13 +62,6 @@ async function markChargeFailedService(
   });
 }
 
-async function cancelChargeService(chargeId: string) {
-  return await prisma.charge.update({
-    where: { id: chargeId },
-    data: { status: ChargeStatus.CANCELED },
-  });
-}
-
 async function getStudentCharges(studentId: string) {
   return await prisma.charge.findMany({
     where: { studentId },
@@ -88,7 +81,6 @@ export {
   createChargeService,
   markChargePaidService,
   markChargeFailedService,
-  cancelChargeService,
   getStudentCharges,
   getPendingChargesService,
 };

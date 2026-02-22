@@ -34,7 +34,7 @@ const limiter = rateLimit({
 const app = express();
 
 // Cron Jobs
-cron.schedule("*/1 * * * *", deactivateStudents);
+cron.schedule("*/3 * * * *", deactivateStudents);
 
 // ================ RATE LIMITER ============
 app.use("/api", limiter);

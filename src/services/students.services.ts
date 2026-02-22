@@ -121,7 +121,10 @@ async function recomputeStudentActiveFlag(
   const hasCurrent = await tx.studentPlan.count({
     where: {
       studentId,
-      status: StudentPlanStatus.ACTIVE,
+      OR: [
+        { status: StudentPlanStatus.ACTIVE },
+        { status: StudentPlanStatus.SUCCEEDED },
+      ],
       endDate: { gt: now },
     },
   });

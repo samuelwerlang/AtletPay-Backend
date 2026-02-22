@@ -1,4 +1,7 @@
 import express from "express";
+import cron from "node-cron";
+import { deactivateStudents } from "./cronJobs/studentCronJobs.js";
+import { prisma } from "./lib/prisma.js";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
 import stripeWebhook from "./routes/webHooks/stripePlatformWebhook.routes.js";
@@ -17,6 +20,7 @@ import createConnectAccount from "./routes/Connect/stripeCreateConnectedAccount.
 import linkConnectAccount from "./routes/Connect/stripeConnectedAccountLink.routes.js";
 
 import { rateLimit } from "express-rate-limit";
+import { StudentPlanStatus } from "@prisma/client";
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -28,6 +32,9 @@ const limiter = rateLimit({
 });
 
 const app = express();
+
+// Cron Jobs
+cron.schedule("*/1 * * * *", deactivateStudents);
 
 // ================ RATE LIMITER ============
 app.use("/api", limiter);

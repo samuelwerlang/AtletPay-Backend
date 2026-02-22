@@ -178,6 +178,7 @@ enum StudentPlanStatus {
   REQUIRES_CONFIRMATION
   REQUIRES_PAYMENT_METHOD
   SUCCEEDED
+  EXPIRED
 }
 
 enum ChargeStatus {

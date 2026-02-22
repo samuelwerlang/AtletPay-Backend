@@ -5,7 +5,6 @@ export interface SubscriptionDTO {
   userId: string;
   saasPlanId: string;
   stripeCustomerId: string;
-  // Stripe.Customer | Stripe.DeletedCustomer;
   stripeSubscriptionId: string;
   status: SubscriptionStatus;
   cancelAtPeriodEnd?: boolean;
@@ -54,40 +53,15 @@ async function createSubscriptionService(subscriptionData: SubscriptionDTO) {
   return createdSubscription;
 }
 
-// async function updateSubscriptionService(
-//   subscriptionData: SubscriptionDTO,
-//   userId: string,
-// ) {
-//   return prisma.$transaction(async (tx) => {
-//     const activeSubscription = await tx.subscription.findFirst({
-//       where: {
-//         userId,
-//         status: SubscriptionStatus.ACTIVE,
-//       },
-//     });
-
-//     if (!activeSubscription) {
-//       throw new Error("There is no active subscription for this user");
-//     }
-
-//     const updatedSubscription = await tx.subscription.update({
-//       where: {
-//         id: activeSubscription.id,
-//       },
-//       data: {
-//         ...subscriptionData,
-//       },
-//     });
-//     return updatedSubscription;
-//   });
-// }
-
 async function updateSubscriptionService(
   subscriptionData: SubscriptionDTO,
   userId: string,
 ) {
   return prisma.subscription.upsert({
-    where: { stripeSubscriptionId: subscriptionData.stripeSubscriptionId },
+    where: {
+      stripeSubscriptionId: subscriptionData.stripeSubscriptionId,
+      userId,
+    },
     update: { ...subscriptionData },
     create: {
       ...subscriptionData,

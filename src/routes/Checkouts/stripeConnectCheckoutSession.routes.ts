@@ -96,6 +96,7 @@ router.post(
                   studentId,
                   userPlanId,
                   userId: user.id,
+                  payment_type: "one_time",
                 },
               },
             }),

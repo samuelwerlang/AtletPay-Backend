@@ -103,8 +103,9 @@ model UserPlan {
 
 model StudentPlan {
   id              String            @id @default(uuid())
-  studentId       String
-  planId          String
+  studentId       String             
+  userPlanId      String
+  stripeId        String             @unique // id do plano no Stripe, para facilitar reconciliação
   status          StudentPlanStatus @default(ACTIVE)
   startDate       DateTime          @default(now())
   endDate         DateTime?
@@ -113,11 +114,11 @@ model StudentPlan {
   // recurringCharges RecurringCharge[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-  plan            UserPlan          @relation(fields: [planId], references: [id], onDelete: Cascade)
+  plan            UserPlan          @relation(fields: [userPlanId], references: [id], onDelete: Cascade)
   student         Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
-  @@index([planId])
+  @@index([userPlanId])
 }
 
 model SaasPlan {
@@ -164,8 +165,19 @@ enum SaasPlanType {
 
 enum StudentPlanStatus {
   ACTIVE
+  CANCELED
   PAST_DUE
-  INACTIVE
+  INCOMPLETE
+  UNPAID
+  TRIALING
+  PAUSED
+  PROCESSING
+  INCOMPLETE_EXPIRED
+  REQUIRES_ACTION
+  REQUIRES_CAPTURE
+  REQUIRES_CONFIRMATION
+  REQUIRES_PAYMENT_METHOD
+  SUCCEEDED
 }
 
 enum ChargeStatus {

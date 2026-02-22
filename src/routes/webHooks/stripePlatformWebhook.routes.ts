@@ -5,8 +5,11 @@ import Stripe from "stripe";
 import { prisma } from "../../lib/prisma.js";
 
 // --Utils--
-import { handleSubscriptionEvent } from "../../utils/stripeWebhookHandlers.js";
-import { SubscriptionStatus } from "@prisma/client";
+import {
+  handleCheckoutCompletedEvent,
+  handleSubscriptionEvent,
+  handleInvoiceEvent,
+} from "../../utils/stripePlatformWebhookHandlers.js";
 
 const router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);
@@ -33,31 +36,9 @@ router.post(
     try {
       switch (event.type) {
         case "checkout.session.completed": {
-          const session = event.data.object as Stripe.Checkout.Session;
-          console.log(session.customer);
-
-          const userId = session.client_reference_id!;
-          const stripeCustomerId =
-            typeof session.customer === "string"
-              ? session.customer
-              : session.customer?.id;
-
-          // Update user with customerId
-          if (userId && stripeCustomerId) {
-            try {
-              await prisma.user.update({
-                where: { id: userId },
-                data: { stripeCustomerId },
-              });
-            } catch (e) {
-              console.error("Erro ao atualizar stripeCustomerId:", e);
-            }
-          } else {
-            console.warn(
-              "userId ou stripeCustomerId ausentes no checkout.session.completed",
-            );
-          }
-
+          const stripeCheckoutSession = event.data
+            .object as Stripe.Checkout.Session;
+          await handleCheckoutCompletedEvent(stripeCheckoutSession);
           break;
         }
         case "customer.subscription.created":
@@ -67,7 +48,7 @@ router.post(
           );
           break;
 
-        // --- Works for both cases ---
+        // --- Function handleSubscriptionEvent works for both cases ---
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
           await handleSubscriptionEvent(
@@ -75,6 +56,15 @@ router.post(
             "update",
           );
           break;
+
+        // --- Function handleInvoiceEvent works for each case aswell ---
+        case "invoice.paid":
+        case "invoice.payment_succeeded":
+        case "invoice.payment_failed": {
+          const stripeInvoice: Stripe.Invoice | any = event.data.object;
+          await handleInvoiceEvent(stripeInvoice);
+          break;
+        }
         default:
           console.error("Unhandled event type:", event.type);
           break;

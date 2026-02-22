@@ -1,3 +1,4 @@
+import config from "../config/config.js";
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
 import { SubscriptionStatus } from "@prisma/client";
@@ -6,6 +7,8 @@ import {
   createSubscriptionService,
   updateSubscriptionService,
 } from "../services/subscriptions.services.js";
+
+const stripe = new Stripe(config.STRIPE_API_KEY);
 
 function mapStripeStatusToPrisma(status: Stripe.Subscription.Status) {
   switch (status) {
@@ -67,6 +70,32 @@ async function getSubscriptionPeriod(sub: any) {
   };
 }
 
+async function handleCheckoutCompletedEvent(
+  stripeCheckoutSession: Stripe.Checkout.Session,
+) {
+  const userId = stripeCheckoutSession.client_reference_id!;
+  const stripeCustomerId =
+    typeof stripeCheckoutSession.customer === "string"
+      ? stripeCheckoutSession.customer
+      : stripeCheckoutSession.customer?.id;
+
+  // Update user with customerId
+  if (userId && stripeCustomerId) {
+    try {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { stripeCustomerId },
+      });
+    } catch (e) {
+      console.error("Erro ao atualizar stripeCustomerId:", e);
+    }
+  } else {
+    console.warn(
+      "userId ou stripeCustomerId ausentes no checkout.session.completed",
+    );
+  }
+}
+
 // --- Global Handler for Subscriptions ---
 async function handleSubscriptionEvent(
   sub: Stripe.Subscription,
@@ -104,10 +133,40 @@ async function handleSubscriptionEvent(
   );
 }
 
+async function handleInvoiceEvent(stripeInvoice: Stripe.Invoice) {
+  if (!(stripeInvoice.billing_reason === "subscription_cycle")) {
+    console.log(
+      "[STRIPE-PLATFORM-WEBHOOK] Invoice doesn't belong to a subscription cycle",
+    );
+    return;
+  }
+
+  const stripeSubscriptionId =
+    typeof stripeInvoice.parent?.subscription_details?.subscription === "string"
+      ? stripeInvoice.parent.subscription_details.subscription
+      : (
+          stripeInvoice.parent?.subscription_details
+            ?.subscription as Stripe.Subscription
+        ).id;
+
+  if (!stripeSubscriptionId) {
+    console.log(
+      `[STRIPE-PLATFORM-WEBHOOK] Invoice has no subscription ${stripeInvoice.id}`,
+    );
+    return;
+  }
+
+  const stripeSubscriptionObject =
+    await stripe.subscriptions.retrieve(stripeSubscriptionId);
+  await handleSubscriptionEvent(stripeSubscriptionObject, "update");
+}
+
 export {
   mapStripeStatusToPrisma,
   getUserBasedOnCustomerId,
   getSaasPlanBasedOnPriceId,
   getSubscriptionPeriod,
+  handleCheckoutCompletedEvent,
   handleSubscriptionEvent,
+  handleInvoiceEvent,
 };

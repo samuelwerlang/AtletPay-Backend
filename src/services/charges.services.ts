@@ -21,7 +21,7 @@ async function createChargeService(
   tx: Prisma.TransactionClient,
   data: ICharge,
 ) {
-  const { studentId, amount, description, status, externalId } = data;
+  const { studentId, amount, description, status, externalId, paidAt } = data;
 
   return tx.charge.create({
     data: {
@@ -30,6 +30,7 @@ async function createChargeService(
       description,
       externalId,
       status,
+      paidAt,
     },
   });
 }

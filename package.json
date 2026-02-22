@@ -13,7 +13,7 @@
     "prisma:g": "prisma generate",
     "prisma:m": "prisma migrate dev",
     "prisma:st": "prisma studio",
-    "stripe:listen/platform": "stripe listen --forward-to http://localhost:8080/webhook/stripe/platform",
+    "stripe:listen/platform": "stripe listen --events checkout.session.completed,customer.subscription.created,customer.subscription.deleted,customer.subscription.updated,invoice.paid,invoice.payment_succeeded,invoice.payment_failed --forward-to http://localhost:8080/webhook/stripe/platform",
     "stripe:listen/connect": "stripe listen --forward-to http://localhost:8080/webhook/stripe/connect"
   },
   "author": "Samuel Werlang",
@@ -28,11 +28,12 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@types/stripe": "^8.0.416",
     "express": "^5.2.1",
     "express-oauth2-jwt-bearer": "^1.7.2",
     "express-rate-limit": "^8.2.1",
     "pg": "^8.16.3",
-    "stripe": "^20.3.0",
+    "stripe": "^20.3.1",
     "tsx": "^4.21.0",
     "uuid": "^13.0.0",
     "zod": "^4.3.5"

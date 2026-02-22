@@ -108,14 +108,6 @@ router.post(
           break;
         }
 
-        /**
-         * ==========================================
-         * ASSINATURA CRIADA (não cria StudentPlan aqui)
-         * ==========================================
-         * No modelo de um StudentPlan por fatura paga:
-         * - NÃO criamos StudentPlan em subscription.created
-         * - O ciclo inicial será criado em invoice.paid quando a primeira fatura for paga
-         */
         case "customer.subscription.created": {
           const stripeSubscription = event.data.object as Stripe.Subscription;
           const { studentId, userPlanId, userId } =
@@ -180,16 +172,7 @@ router.post(
           });
           break;
         }
-        /**
-         * ==========================================
-         * ASSINATURA RENOVAÇÃO (invoice pago)
-         * ==========================================
-         * Marca a Charge PENDING como PAID e cria um StudentPlan novo por ciclo,
-         * inclusive no primeiro ciclo quando a primeira fatura é paga.
-         *
-         * Proteção contra ordem de eventos: se invoice.created não rodou ainda,
-         * cria a Charge aqui antes de marcar como PAID.
-         */
+
         case "invoice.paid": {
           const invoice = event.data.object as Stripe.Invoice;
           if (

@@ -1,4 +1,4 @@
-import { StudentPlanStatus } from "@prisma/client";
+import { StudentPlanStatus, UserRole } from "@prisma/client";
 import { prisma } from "../lib/prisma.js";
 
 async function deactivateStudents() {
@@ -40,4 +40,59 @@ async function deactivateStudents() {
   }
 }
 
-export { deactivateStudents };
+async function reconcileStudentUserLinks() {
+  try {
+    const pendingStudents = await prisma.student.findMany({
+      where: {
+        studentUserId: null,
+        email: { not: null },
+      },
+      select: { id: true, email: true },
+    });
+
+    if (!pendingStudents.length) {
+      console.log("Cronjob: no student-user links to reconcile");
+      return;
+    }
+
+    let linkedCount = 0;
+    let skippedCount = 0;
+
+    for (const student of pendingStudents) {
+      const normalizedEmail = student.email?.trim();
+      if (!normalizedEmail) {
+        skippedCount += 1;
+        continue;
+      }
+
+      const studentUser = await prisma.user.findFirst({
+        where: {
+          role: UserRole.STUDENT,
+          email: { equals: normalizedEmail, mode: "insensitive" },
+          studentProfile: null,
+        },
+        select: { id: true },
+      });
+
+      if (!studentUser) {
+        skippedCount += 1;
+        continue;
+      }
+
+      await prisma.student.update({
+        where: { id: student.id },
+        data: { studentUserId: studentUser.id },
+      });
+
+      linkedCount += 1;
+    }
+
+    console.log(
+      `Cronjob: reconciled ${linkedCount} student-user links (skipped ${skippedCount})`,
+    );
+  } catch (error) {
+    console.error("Error in student-link reconciliation Cronjob:", error);
+  }
+}
+
+export { deactivateStudents, reconcileStudentUserLinks };

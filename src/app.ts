@@ -1,6 +1,9 @@
 import express from "express";
 import cron from "node-cron";
-import { deactivateStudents } from "./cronJobs/studentCronJobs.js";
+import {
+  deactivateStudents,
+  reconcileStudentUserLinks,
+} from "./cronJobs/studentCronJobs.js";
 import { prisma } from "./lib/prisma.js";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
@@ -38,6 +41,7 @@ const app = express();
 
 // Cron Jobs
 cron.schedule("*/3 * * * *", deactivateStudents);
+cron.schedule("0 0 */1 * * *", reconcileStudentUserLinks);
 
 // ================ RATE LIMITER ============
 app.use("/api", limiter);

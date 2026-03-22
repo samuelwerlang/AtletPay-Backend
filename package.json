@@ -5,7 +5,7 @@
   "description": "mvp backend with expressjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node build/server.js",
     "dev:watch": "tsx watch src/server.ts",
     "dev": "tsx src/server.ts",
@@ -20,9 +20,12 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.0.5",
     "dotenv": "^17.2.3",
+    "jest": "^30.2.0",
     "prisma": "^7.2.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {

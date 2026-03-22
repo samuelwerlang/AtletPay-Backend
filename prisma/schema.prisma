@@ -20,6 +20,9 @@ model User {
   students     Student[]
   subscription Subscription[]
   plans        UserPlan[]
+  trainingSheets TrainingSheet[]
+  dietPlans     DietPlan[]
+  meals         Meal[]
 }
 
 model Student {
@@ -33,7 +36,93 @@ model Student {
   userId           String
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   studentPlans            StudentPlan[]
+  trainingSheets   TrainingSheet[]
+  dietPlans        DietPlan[]
   @@index([userId])
+}
+
+model TrainingSheet {
+  id          String                  @id @default(uuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime?
+  userId      String
+  studentId   String
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  user        User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  student     Student                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  exercises   TrainingSheetExercise[]
+
+  @@index([userId])
+  @@index([studentId])
+}
+
+model TrainingSheetExercise {
+  id               String        @id @default(uuid())
+  trainingSheetId  String
+  exerciseName     String
+  sets             Int
+  repetitions      String
+  notes            String?
+  order            Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  trainingSheet    TrainingSheet @relation(fields: [trainingSheetId], references: [id], onDelete: Cascade)
+
+  @@index([trainingSheetId])
+  @@index([order])
+}
+
+model DietPlan {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  userId      String
+  studentId   String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  student     Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  meals       DietPlanMeal[]
+
+  @@index([userId])
+  @@index([studentId])
+}
+
+model Meal {
+  id           String       @id @default(uuid())
+  name         String
+  quantity     String?
+  kcal         Int?
+  substitutes  String?
+  notes        String?
+  userId       String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dietPlans    DietPlanMeal[]
+
+  @@index([userId])
+}
+
+model DietPlanMeal {
+  id          String    @id @default(uuid())
+  dietPlanId  String
+  mealId      String
+  mealOrder   Int       @default(0)
+  mealTime    String?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  dietPlan    DietPlan  @relation(fields: [dietPlanId], references: [id], onDelete: Cascade)
+  meal        Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@index([dietPlanId])
+  @@index([mealId])
+  @@unique([dietPlanId, mealOrder])
 }
 
 model Expense {
@@ -153,6 +242,7 @@ model Subscription {
 
 enum UserRole {
   USER
+  STUDENT
   ADMIN
 }
 

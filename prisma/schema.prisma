@@ -15,9 +15,10 @@ model User {
   auth0Id      String        @unique
   stripeCustomerId String?   @unique // Stripe Customer ID
   stripeAccountId  String?       @unique //Stripe Connect
-  name         String?       @unique
+  name         String?
   expenses     Expense[]
-  students     Student[]
+  students     Student[]     @relation("CoachStudents")
+  studentProfile Student?    @relation("StudentAccount")
   subscription Subscription[]
   plans        UserPlan[]
   trainingSheets TrainingSheet[]
@@ -34,7 +35,9 @@ model Student {
   updatedAt        DateTime          @updatedAt
   createdAt        DateTime          @default(now())
   userId           String
-  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User              @relation("CoachStudents", fields: [userId], references: [id], onDelete: Cascade)
+  studentUserId    String?           @unique
+  studentUser      User?             @relation("StudentAccount", fields: [studentUserId], references: [id], onDelete: SetNull)
   studentPlans            StudentPlan[]
   trainingSheets   TrainingSheet[]
   dietPlans        DietPlan[]

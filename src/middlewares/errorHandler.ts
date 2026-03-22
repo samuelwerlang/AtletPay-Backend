@@ -15,7 +15,11 @@ export function errorMiddleware(
         return res.status(404).json({ message: "Resource not found" });
 
       case "P2002":
-        return res.status(409).json({ message: "Duplicate resource" });
+        return res.status(409).json({
+          message: "Duplicate resource",
+          field:
+            (err.meta?.target as string[] | undefined)?.join(",") ?? undefined,
+        });
 
       case "P2003":
         return res.status(400).json({ message: "Invalid relation" });

@@ -13,7 +13,6 @@ import expensesRouter from "./routes/expenses.routes.js";
 import userPlansRouter from "./routes/userPlans.routes.js";
 import trainingSheetsRouter from "./routes/trainingSheets.routes.js";
 import dietPlansRouter from "./routes/dietPlans.routes.js";
-import studentAccessRouter from "./routes/studentAccess.routes.js";
 // import studentPlansRouter from "./routes/studentplans.routes.js";
 
 import createCheckoutSession from "./routes/Checkouts/stripeCheckoutSession.routes.js";
@@ -72,8 +71,6 @@ app.use("/api", expensesRouter);
 app.use("/api", userPlansRouter);
 app.use("/api", trainingSheetsRouter);
 app.use("/api", dietPlansRouter);
-app.use("/api", studentAccessRouter);
-// app.use("/api", studentPlansRouter);
 app.use("/api", createCheckoutSession);
 app.use("/api", createPortalSession);
 app.use("/api", createConnectAccount);

@@ -85,8 +85,17 @@ async function getAllTrainingSheetsController(req: Request, res: Response) {
   }
 
   const query = getAllQuerySchema.parse(req.query);
+  const studentContext = res.locals.studentContext as
+    | { studentId: string; coachUserId: string }
+    | undefined;
 
-  const data = await getAllTrainingSheetsService(user.id, query.studentId);
+  const effectiveUserId = studentContext?.coachUserId ?? user.id;
+  const effectiveStudentId = studentContext?.studentId ?? query.studentId;
+
+  const data = await getAllTrainingSheetsService(
+    effectiveUserId,
+    effectiveStudentId,
+  );
 
   return res.status(200).json(data);
 }
@@ -100,7 +109,17 @@ async function getTrainingSheetByIdController(req: Request, res: Response) {
   }
 
   const { trainingSheetId } = idSchema.parse(req.params);
-  const data = await getTrainingSheetByIdService(user.id, trainingSheetId);
+  const studentContext = res.locals.studentContext as
+    | { studentId: string; coachUserId: string }
+    | undefined;
+
+  const effectiveUserId = studentContext?.coachUserId ?? user.id;
+  const effectiveStudentId = studentContext?.studentId;
+  const data = await getTrainingSheetByIdService(
+    effectiveUserId,
+    trainingSheetId,
+    effectiveStudentId,
+  );
 
   return res.status(200).json(data);
 }

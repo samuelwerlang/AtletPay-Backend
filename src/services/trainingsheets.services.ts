@@ -140,9 +140,14 @@ async function getAllTrainingSheetsService(userId: string, studentId?: string) {
 async function getTrainingSheetByIdService(
   userId: string,
   trainingSheetId: string,
+  studentId?: string,
 ) {
   const trainingSheet = await prisma.trainingSheet.findFirst({
-    where: { id: trainingSheetId, userId },
+    where: {
+      id: trainingSheetId,
+      userId,
+      ...(studentId ? { studentId } : {}),
+    },
     include: {
       exercises: {
         orderBy: { order: "asc" },

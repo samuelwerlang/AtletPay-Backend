@@ -9,6 +9,7 @@ import { jwtCheck } from "../../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../../middlewares/checkAuth.middleware.js";
 import checkSaasSubscription from "../../middlewares/checkSaasSubscription.middleware.js";
 import { checkStripeAccount } from "../../middlewares/checkStripeAcc.middleware.js";
+import blockStudentBilling from "../../middlewares/blockStudentBilling.middleware.js";
 
 const router: Router = express.Router();
 const stripe = new Stripe(config.STRIPE_API_KEY);
@@ -23,6 +24,7 @@ router.post(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  blockStudentBilling,
   checkSaasSubscription,
   checkStripeAccount,
   async (req: Request, res: Response) => {

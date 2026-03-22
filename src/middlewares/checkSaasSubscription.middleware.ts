@@ -1,11 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma.js";
-import { SubscriptionStatus } from "@prisma/client";
+import { SubscriptionStatus, UserRole } from "@prisma/client";
 export async function checkSaasSubscription(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
+  if (res.locals.user?.role === UserRole.STUDENT) {
+    return next();
+  }
+
   const userId = res.locals.user.id;
   const subscription = await prisma.subscription.findFirst({
     where: {

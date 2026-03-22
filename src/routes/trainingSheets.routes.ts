@@ -3,6 +3,7 @@ import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
 import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
 import checkSaasSubscription from "../middlewares/checkSaasSubscription.middleware.js";
+import checkStudentReadOnly from "../middlewares/checkStudentReadOnly.middleware.js";
 import {
   createTrainingSheetController,
   deleteTrainingSheetController,
@@ -18,6 +19,7 @@ router.post(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   createTrainingSheetController,
 );
@@ -27,6 +29,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   getAllTrainingSheetsController,
 );
@@ -36,6 +39,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   getTrainingSheetByIdController,
 );
@@ -45,6 +49,7 @@ router.patch(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   updateTrainingSheetController,
 );
@@ -54,6 +59,7 @@ router.delete(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   deleteTrainingSheetController,
 );

@@ -3,6 +3,7 @@ import { jwtCheck } from "../middlewares/jwtCheck.middleware.js";
 import requireAuth from "../middlewares/checkAuth.middleware.js";
 import getCurrentUser from "../middlewares/getCurrentUser.middleware.js";
 import checkSaasSubscription from "../middlewares/checkSaasSubscription.middleware.js";
+import checkStudentReadOnly from "../middlewares/checkStudentReadOnly.middleware.js";
 import {
   createDietPlanController,
   deleteDietPlanController,
@@ -19,6 +20,7 @@ router.post(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   createDietPlanController,
 );
@@ -28,6 +30,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   getAllDietPlansController,
 );
@@ -37,6 +40,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   getDietPlanByIdController,
 );
@@ -46,6 +50,7 @@ router.patch(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   updateDietPlanController,
 );
@@ -55,6 +60,7 @@ router.delete(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   deleteDietPlanController,
 );
@@ -64,6 +70,7 @@ router.get(
   jwtCheck,
   requireAuth,
   getCurrentUser,
+  checkStudentReadOnly,
   checkSaasSubscription,
   getMealsLibraryController,
 );

@@ -72,7 +72,10 @@ async function upsertMealForUser(
   });
 }
 
-async function createDietPlanService(userId: string, payload: ICreateDietPlanInput) {
+async function createDietPlanService(
+  userId: string,
+  payload: ICreateDietPlanInput,
+) {
   await ensureStudentBelongsToUser(userId, payload.studentId);
 
   return prisma.$transaction(async (tx) => {
@@ -135,9 +138,17 @@ async function getAllDietPlansService(userId: string, studentId?: string) {
   });
 }
 
-async function getDietPlanByIdService(userId: string, dietPlanId: string) {
+async function getDietPlanByIdService(
+  userId: string,
+  dietPlanId: string,
+  studentId?: string,
+) {
   const plan = await prisma.dietPlan.findFirst({
-    where: { id: dietPlanId, userId },
+    where: {
+      id: dietPlanId,
+      userId,
+      ...(studentId ? { studentId } : {}),
+    },
     include: {
       meals: {
         orderBy: { mealOrder: "asc" },

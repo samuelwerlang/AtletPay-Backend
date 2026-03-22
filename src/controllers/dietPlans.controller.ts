@@ -84,7 +84,16 @@ async function getAllDietPlansController(req: Request, res: Response) {
   }
 
   const query = getAllQuerySchema.parse(req.query);
-  const data = await getAllDietPlansService(user.id, query.studentId);
+  const studentContext = res.locals.studentContext as
+    | { studentId: string; coachUserId: string }
+    | undefined;
+
+  const effectiveUserId = studentContext?.coachUserId ?? user.id;
+  const effectiveStudentId = studentContext?.studentId ?? query.studentId;
+  const data = await getAllDietPlansService(
+    effectiveUserId,
+    effectiveStudentId,
+  );
 
   return res.status(200).json(data);
 }
@@ -98,7 +107,17 @@ async function getDietPlanByIdController(req: Request, res: Response) {
   }
 
   const { dietPlanId } = idSchema.parse(req.params);
-  const data = await getDietPlanByIdService(user.id, dietPlanId);
+  const studentContext = res.locals.studentContext as
+    | { studentId: string; coachUserId: string }
+    | undefined;
+
+  const effectiveUserId = studentContext?.coachUserId ?? user.id;
+  const effectiveStudentId = studentContext?.studentId;
+  const data = await getDietPlanByIdService(
+    effectiveUserId,
+    dietPlanId,
+    effectiveStudentId,
+  );
 
   return res.status(200).json(data);
 }
@@ -152,7 +171,12 @@ async function getMealsLibraryController(req: Request, res: Response) {
       .json({ message: "User not loaded in request context" });
   }
 
-  const meals = await getMealsLibraryService(user.id);
+  const studentContext = res.locals.studentContext as
+    | { studentId: string; coachUserId: string }
+    | undefined;
+
+  const effectiveUserId = studentContext?.coachUserId ?? user.id;
+  const meals = await getMealsLibraryService(effectiveUserId);
 
   return res.status(200).json(meals);
 }

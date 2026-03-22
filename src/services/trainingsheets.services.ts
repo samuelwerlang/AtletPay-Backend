@@ -1,7 +1,9 @@
 import { prisma } from "../lib/prisma.js";
+import { Prisma } from "@prisma/client";
 
 interface ITrainingExerciseInput {
-  exerciseName: string;
+  exerciseId?: string;
+  exerciseName?: string;
   sets: number;
   repetitions: string;
   notes?: string;
@@ -34,34 +36,84 @@ async function ensureStudentBelongsToUser(userId: string, studentId: string) {
   }
 }
 
+async function resolveExerciseIdForUser(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  exerciseInput: ITrainingExerciseInput,
+) {
+  if (exerciseInput.exerciseId) {
+    const existingExercise = await tx.exercise.findFirst({
+      where: {
+        id: exerciseInput.exerciseId,
+        userId,
+      },
+      select: { id: true },
+    });
+
+    if (!existingExercise) {
+      throw new Error("One or more exercises were not found");
+    }
+
+    return existingExercise.id;
+  }
+
+  const rawExerciseName = exerciseInput.exerciseName?.trim();
+  if (!rawExerciseName) {
+    throw new Error("Each item must provide exerciseId or exerciseName");
+  }
+
+  const exercise = await tx.exercise.upsert({
+    where: {
+      userId_name: {
+        userId,
+        name: rawExerciseName,
+      },
+    },
+    update: {},
+    create: {
+      userId,
+      name: rawExerciseName,
+    },
+    select: { id: true },
+  });
+
+  return exercise.id;
+}
+
 async function createTrainingSheetService(
   userId: string,
   payload: ICreateTrainingSheetInput,
 ) {
   await ensureStudentBelongsToUser(userId, payload.studentId);
+  return prisma.$transaction(async (tx) => {
+    const preparedExercises = await Promise.all(
+      payload.exercises.map(async (exercise, index) => ({
+        exerciseId: await resolveExerciseIdForUser(tx, userId, exercise),
+        sets: exercise.sets,
+        repetitions: exercise.repetitions,
+        notes: exercise.notes,
+        order: exercise.order ?? index,
+      })),
+    );
 
-  return prisma.trainingSheet.create({
-    data: {
-      name: payload.name,
-      startDate: payload.startDate,
-      endDate: payload.endDate,
-      userId,
-      studentId: payload.studentId,
-      exercises: {
-        create: payload.exercises.map((exercise, index) => ({
-          exerciseName: exercise.exerciseName,
-          sets: exercise.sets,
-          repetitions: exercise.repetitions,
-          notes: exercise.notes,
-          order: exercise.order ?? index,
-        })),
+    return tx.trainingSheet.create({
+      data: {
+        name: payload.name,
+        startDate: payload.startDate,
+        endDate: payload.endDate,
+        userId,
+        studentId: payload.studentId,
+        exercises: {
+          create: preparedExercises,
+        },
       },
-    },
-    include: {
-      exercises: {
-        orderBy: { order: "asc" },
+      include: {
+        exercises: {
+          orderBy: { order: "asc" },
+          include: { exercise: true },
+        },
       },
-    },
+    });
   });
 }
 
@@ -79,6 +131,7 @@ async function getAllTrainingSheetsService(userId: string, studentId?: string) {
     include: {
       exercises: {
         orderBy: { order: "asc" },
+        include: { exercise: true },
       },
     },
   });
@@ -93,6 +146,7 @@ async function getTrainingSheetByIdService(
     include: {
       exercises: {
         orderBy: { order: "asc" },
+        include: { exercise: true },
       },
     },
   });
@@ -119,6 +173,18 @@ async function updateTrainingSheetService(
   }
 
   return prisma.$transaction(async (tx) => {
+    const preparedExercises = payload.exercises
+      ? await Promise.all(
+          payload.exercises.map(async (exercise, index) => ({
+            exerciseId: await resolveExerciseIdForUser(tx, userId, exercise),
+            sets: exercise.sets,
+            repetitions: exercise.repetitions,
+            notes: exercise.notes,
+            order: exercise.order ?? index,
+          })),
+        )
+      : undefined;
+
     if (payload.exercises) {
       await tx.trainingSheetExercise.deleteMany({
         where: { trainingSheetId },
@@ -131,21 +197,16 @@ async function updateTrainingSheetService(
         name: payload.name,
         startDate: payload.startDate,
         endDate: payload.endDate,
-        exercises: payload.exercises
+        exercises: preparedExercises
           ? {
-              create: payload.exercises.map((exercise, index) => ({
-                exerciseName: exercise.exerciseName,
-                sets: exercise.sets,
-                repetitions: exercise.repetitions,
-                notes: exercise.notes,
-                order: exercise.order ?? index,
-              })),
+              create: preparedExercises,
             }
           : undefined,
       },
       include: {
         exercises: {
           orderBy: { order: "asc" },
+          include: { exercise: true },
         },
       },
     });
@@ -172,6 +233,7 @@ async function deleteTrainingSheetService(
     include: {
       exercises: {
         orderBy: { order: "asc" },
+        include: { exercise: true },
       },
     },
   });

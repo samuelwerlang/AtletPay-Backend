@@ -22,6 +22,7 @@ model User {
   subscription Subscription[]
   plans        UserPlan[]
   trainingSheets TrainingSheet[]
+  exercises     Exercise[]
   dietPlans     DietPlan[]
   meals         Meal[]
 }
@@ -64,7 +65,7 @@ model TrainingSheet {
 model TrainingSheetExercise {
   id               String        @id @default(uuid())
   trainingSheetId  String
-  exerciseName     String
+  exerciseId       String
   sets             Int
   repetitions      String
   notes            String?
@@ -72,9 +73,25 @@ model TrainingSheetExercise {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   trainingSheet    TrainingSheet @relation(fields: [trainingSheetId], references: [id], onDelete: Cascade)
+  exercise         Exercise      @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
 
   @@index([trainingSheetId])
+  @@index([exerciseId])
   @@index([order])
+}
+
+model Exercise {
+  id           String                 @id @default(uuid())
+  name         String
+  description  String?
+  userId       String
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  user         User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingUsages TrainingSheetExercise[]
+
+  @@index([userId])
+  @@unique([userId, name])
 }
 
 model DietPlan {

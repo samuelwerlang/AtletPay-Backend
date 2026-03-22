@@ -8,13 +8,22 @@ import {
   updateTrainingSheetService,
 } from "../services/trainingsheets.services.js";
 
-const trainingExerciseSchema = z.object({
-  exerciseName: z.string().min(1),
-  sets: z.number().int().positive(),
-  repetitions: z.string().min(1),
-  notes: z.string().optional(),
-  order: z.number().int().nonnegative().optional(),
-});
+const trainingExerciseSchema = z
+  .object({
+    exerciseId: z.uuid().optional(),
+    exerciseName: z.string().min(1).optional(),
+    sets: z.number().int().positive(),
+    repetitions: z.string().min(1),
+    notes: z.string().optional(),
+    order: z.number().int().nonnegative().optional(),
+  })
+  .refine(
+    (value) =>
+      value.exerciseId !== undefined || value.exerciseName !== undefined,
+    {
+      message: "Each item must provide exerciseId or exerciseName",
+    },
+  );
 
 const createTrainingSheetSchema = z.object({
   name: z.string().min(1),

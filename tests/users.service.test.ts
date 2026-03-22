@@ -1,9 +1,14 @@
 const mockPrisma = {
+  $transaction: jest.fn(),
   user: {
     upsert: jest.fn(),
     findUnique: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+  },
+  student: {
+    findMany: jest.fn(),
+    update: jest.fn(),
   },
 };
 
@@ -21,10 +26,24 @@ import {
 describe("users.service", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    mockPrisma.$transaction.mockImplementation(async (callback: any) =>
+      callback({
+        user: mockPrisma.user,
+        student: mockPrisma.student,
+      }),
+    );
+
+    mockPrisma.student.findMany.mockResolvedValue([]);
   });
 
   it("creates or updates a user with the expected upsert payload", async () => {
-    const user = { id: "user-1", email: "sam@example.com", name: "Sam" };
+    const user = {
+      id: "user-1",
+      email: "sam@example.com",
+      name: "Sam",
+      role: "USER",
+    };
     mockPrisma.user.upsert.mockResolvedValue(user);
 
     const result = await createUserService({
@@ -39,17 +58,25 @@ describe("users.service", () => {
       update: {
         email: "sam@example.com",
         name: "Sam",
+        role: "USER",
       },
       create: {
         auth0Id: "auth0|123",
         email: "sam@example.com",
         name: "Sam",
+        role: "USER",
       },
       select: {
         id: true,
         email: true,
         name: true,
+        role: true,
       },
+    });
+
+    expect(mockPrisma.student.findMany).toHaveBeenCalledWith({
+      where: { email: { equals: "sam@example.com", mode: "insensitive" } },
+      select: { id: true, studentUserId: true },
     });
   });
 
@@ -59,7 +86,12 @@ describe("users.service", () => {
   });
 
   it("queries a user by auth0 id", async () => {
-    const user = { id: "user-1", email: "sam@example.com", name: "Sam" };
+    const user = {
+      id: "user-1",
+      email: "sam@example.com",
+      name: "Sam",
+      role: "USER",
+    };
     mockPrisma.user.findUnique.mockResolvedValue(user);
 
     const result = await getUserService("auth0|123");
@@ -67,7 +99,7 @@ describe("users.service", () => {
     expect(result).toEqual(user);
     expect(mockPrisma.user.findUnique).toHaveBeenCalledWith({
       where: { auth0Id: "auth0|123" },
-      select: { id: true, email: true, name: true },
+      select: { id: true, email: true, name: true, role: true },
     });
   });
 
@@ -82,7 +114,11 @@ describe("users.service", () => {
   });
 
   it("updates a user including stripe account id", async () => {
-    const updatedUser = { email: "sam@example.com", name: "Sam" };
+    const updatedUser = {
+      email: "sam@example.com",
+      name: "Sam",
+      role: "USER",
+    };
     mockPrisma.user.update.mockResolvedValue(updatedUser);
 
     const result = await updateUserService({
@@ -104,6 +140,7 @@ describe("users.service", () => {
       select: {
         email: true,
         name: true,
+        role: true,
       },
     });
   });

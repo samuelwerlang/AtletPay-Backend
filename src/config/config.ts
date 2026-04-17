@@ -4,6 +4,8 @@ const config = {
   DATABASE_URL: process.env.DATABASE_URL || "",
   STRIPE_API_KEY: process.env.STRIPE_API_KEY || "",
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || "",
+  STRIPE_CONNECT_WEBHOOK_SECRET:
+    process.env.STRIPE_CONNECT_WEBHOOK_SECRET || "",
   secret: process.env.SECRET || "",
   audience: process.env.AUDIENCE || "",
   baseurl: process.env.BASE_URL || "",

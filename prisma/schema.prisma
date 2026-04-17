@@ -3,12 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+    provider  = "postgresql"
 }
 
 model User {
   id           String        @id @default(uuid())
   email        String        @unique
+  CPF         String?       @unique
   role         UserRole      @default(USER)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

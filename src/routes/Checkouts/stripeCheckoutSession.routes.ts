@@ -30,18 +30,35 @@ router.post(
       });
     }
 
-    // Cria customer no Stripe se não existir
+    //Cria customer no Stripe se não existir
     if (!user.stripeCustomerId) {
       const customer = await stripe.customers.create({
         email: user.email,
         name: user.name,
+        tax_exempt: "none",
+        address: {
+          country: "BR",
+        },
       });
-
-      // Atualiza user no banco
+      //Atualiza user no banco
       user = await prisma.user.update({
         where: { id: user.id },
         data: { stripeCustomerId: customer.id },
       });
+    }
+
+    // Diagnostico: se o customer ja tiver tax ID salvo, o Checkout nao mostra o formulario novamente.
+    try {
+      const customerTaxIds = await stripe.customers.listTaxIds(user.stripeCustomerId, {
+        limit: 5,
+      });
+      console.log("[CHECKOUT] Existing customer tax IDs:", {
+        customerId: user.stripeCustomerId,
+        count: customerTaxIds.data.length,
+        types: customerTaxIds.data.map((t) => t.type),
+      });
+    } catch (err) {
+      console.warn("[CHECKOUT] Could not list customer tax IDs", err);
     }
 
     // Lista preços
@@ -56,7 +73,6 @@ router.post(
 
     // Cria checkout session
     const session = await stripe.checkout.sessions.create({
-      billing_address_collection: "auto",
       line_items: [
         {
           price: prices.data[0].id,
@@ -64,8 +80,16 @@ router.post(
         },
       ],
       mode: "subscription",
+      billing_address_collection: "required",
+      tax_id_collection: {
+        enabled: true,
+      },
+      customer_update: {
+        name: "auto",
+        address: "auto",
+      },
       customer: user.stripeCustomerId, // sempre existe
-      client_reference_id: user.id,
+      // client_reference_id: user.id,
       locale: "pt-BR",
       success_url: `${config.baseurl}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${config.baseurl}/billing`,

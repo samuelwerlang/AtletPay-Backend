@@ -26,15 +26,23 @@ router.post(
   express.raw({ type: "application/json" }),
   async (req: Request, res: Response) => {
     let event: Stripe.Event;
+    const connectWebhookSecret =
+      config.STRIPE_CONNECT_WEBHOOK_SECRET || config.STRIPE_WEBHOOK_SECRET;
 
-    // Verifica assinatura do Stripe (ideal: usar um secret dedicado para Connect, ex.: STRIPE_CONNECT_WEBHOOK_SECRET)
+    if (!connectWebhookSecret) {
+      console.error(
+        "[CONNECT-Webhook] Missing webhook secret configuration",
+      );
+      return res.sendStatus(500);
+    }
+
+    // Verifica assinatura do Stripe; usa secret dedicado quando disponível
     try {
       const signature = req.headers["stripe-signature"] as string;
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
-        // Trocar para config.STRIPE_CONNECT_WEBHOOK_SECRET quando configurar um endpoint dedicado de Connect
-        config.STRIPE_WEBHOOK_SECRET,
+        connectWebhookSecret,
       );
     } catch (err: any) {
       console.error(
@@ -113,7 +121,11 @@ router.post(
           const { studentId, userPlanId, userId } =
             stripeSubscription.metadata || {};
           if (!studentId || !userPlanId || !userId) {
-            console.log("[CONNECT-Webhook] Missing subscription metadata");
+            console.log(
+              "[CONNECT-Webhook] Missing subscription metadata, ignoring event:",
+              stripeSubscription.id,
+            );
+            break;
           }
           await prisma.$transaction(async (tx) => {
             await upsertStudentPlanBasedOnSubscriptionService(
@@ -133,7 +145,11 @@ router.post(
           const { studentId, userPlanId, userId } =
             stripeSubscription.metadata || {};
           if (!studentId || !userPlanId || !userId) {
-            console.log("[CONNECT-Webhook] Missing subscription metadata");
+            console.log(
+              "[CONNECT-Webhook] Missing subscription metadata, ignoring event:",
+              stripeSubscription.id,
+            );
+            break;
           }
           await prisma.$transaction(async (tx) => {
             await upsertStudentPlanBasedOnSubscriptionService(
@@ -153,7 +169,11 @@ router.post(
           const { studentId, userPlanId, userId } =
             stripeSubscription.metadata || {};
           if (!studentId || !userPlanId || !userId) {
-            console.log("[CONNECT-Webhook] Missing subscription metadata");
+            console.log(
+              "[CONNECT-Webhook] Missing subscription metadata, ignoring event:",
+              stripeSubscription.id,
+            );
+            break;
           }
 
           await prisma.$transaction(async (tx) => {

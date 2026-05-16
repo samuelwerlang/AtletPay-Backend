@@ -26,23 +26,14 @@ router.post(
   express.raw({ type: "application/json" }),
   async (req: Request, res: Response) => {
     let event: Stripe.Event;
-    const connectWebhookSecret =
-      config.STRIPE_CONNECT_WEBHOOK_SECRET || config.STRIPE_WEBHOOK_SECRET;
 
-    if (!connectWebhookSecret) {
-      console.error(
-        "[CONNECT-Webhook] Missing webhook secret configuration",
-      );
-      return res.sendStatus(500);
-    }
-
-    // Verifica assinatura do Stripe; usa secret dedicado quando disponível
+    // Verifica assinatura do Stripe (ideal: usar um secret dedicado para Connect, ex.: STRIPE_CONNECT_WEBHOOK_SECRET)
     try {
       const signature = req.headers["stripe-signature"] as string;
       event = stripe.webhooks.constructEvent(
         req.body,
         signature,
-        connectWebhookSecret,
+        config.STRIPE_WEBHOOK_SECRET,
       );
     } catch (err: any) {
       console.error(

@@ -4,7 +4,6 @@ import {
   deactivateStudents,
   reconcileStudentUserLinks,
 } from "./cronJobs/studentCronJobs.js";
-import { prisma } from "./lib/prisma.js";
 import { jwtCheck } from "./middlewares/jwtCheck.middleware.js";
 import { errorMiddleware } from "./middlewares/errorHandler.js";
 import stripeWebhook from "./routes/webHooks/stripePlatformWebhook.routes.js";
@@ -56,17 +55,6 @@ app.use(express.json());
 // ================= PUBLIC ROUTES ==========
 app.get("/", (req, res) => {
   res.json({ status: "API running" });
-});
-
-app.get("/callback", (req, res) => {
-  res.send(`
-    <h1>Login OK</h1>
-    <p>Copy acess token:</p>
-    <script>
-    const hash = window.location.hash;
-    document.body.innerHTML += "<pre>" + hash + "</pre>";
-    </script>
-    `);
 });
 
 // ================= PROTECTED ROUTES =================

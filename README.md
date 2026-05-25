@@ -152,4 +152,4 @@ The API uses Auth0 with Bearer JWT for protected routes. Main authorization role
 
 ## License
 
-This project is licensed under the MIT License.
+This project is proprietary software. No rights are granted to copy, distribute, modify, or use this code without express written permission.

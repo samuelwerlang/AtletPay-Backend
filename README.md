@@ -1,235 +1,155 @@
 # AtletPay Backend
 
-Backend do AtletPay, um SaaS para personal trainers gerenciarem alunos, planos, treino, dieta e cobranca com Stripe.
+This is the backend API for AtletPay, a SaaS platform that helps personal trainers manage students, training programs, diet plans, finances, and Stripe billing.
 
-## Resumo
+## Product Overview
 
-- Stack: Node.js, Express, TypeScript (ESM), Prisma, PostgreSQL, Auth0, Stripe, Zod.
-- API base: `/api`
-- Webhooks: `/webhook/stripe/platform` e `/webhook/stripe/connect`
-- Status atual: build e testes passando.
+AtletPay centralizes business logic and integrations for a personalized fitness management service:
 
-## Perfis e regras de acesso
+- Student registration and linking to a trainer profile (`Student`).
+- Reusable exercise library for each trainer.
+- Training plan creation and editing (`TrainingSheet`).
+- Diet plan creation and editing (`DietPlan`).
+- Expense tracking and trainer service plans (`UserPlan`).
+- Stripe billing with Checkout sessions, Billing Portal, and Stripe Connect onboarding.
+- Webhooks to keep subscriptions, invoices, and billing status synchronized.
 
-- `ADMIN`
-  - Pode criar planos SaaS (`POST /api/saasplan`).
-- `USER` (personal)
-  - Gerencia alunos, planos, treinos, dietas, exercicios, checkout e conectividade Stripe.
-- `STUDENT`
-  - Leitura apenas de treino e dieta.
-  - Somente rotas `GET` em treino/dieta.
-  - Precisa estar vinculado (`Student.studentUserId`) e ativo (`Student.isActive=true`).
-  - Nao pode criar subscription/checkout (`403` nas rotas de billing).
+## Core Stack
 
-## Fluxos principais
+- Node.js + Express
+- TypeScript with ESM
+- Prisma ORM
+- PostgreSQL
+- Auth0 for authentication and authorization
+- Stripe (Checkout, Billing Portal, Connect)
+- Zod for payload validation
 
-### 1) Conta de aluno vinculada por email
+## Authentication and Roles
 
-- O personal cria um `Student` com email.
-- O aluno cria conta Auth0.
-- Em `POST /api/user`, o backend faz upsert do `User` e tenta vincular automaticamente por email.
-- Quando o vinculo e univoco, o usuario vira `role=STUDENT`.
+The API uses Auth0 with Bearer JWT for protected routes. Main authorization roles:
 
-### 2) Biblioteca de exercicios
+- `ADMIN`: can create SaaS plans (`/api/saasplan`).
+- `USER`: a personal trainer who manages students, plans, training, diets, exercises, billing, and Stripe actions.
+- `STUDENT`: limited read access, mainly for viewing training and diet plans.
 
-- Modelo `Exercise` por personal (`userId`).
-- CRUD dedicado (`/api/exercise*` e `/api/exercises`).
-- `TrainingSheetExercise` referencia `exerciseId`.
+> Webhook routes (`/webhook/*`) do not require authentication.
 
-### 3) Training Sheet com criacao inline de exercicio
+## Base Routes
 
-Nos itens de exercicio da planilha, pode enviar:
+- Protected API base: `/api`
+- Stripe webhooks: `/webhook`
+- Public health check: `/`
 
-- `exerciseId`: reutiliza exercicio existente.
-- `exerciseName`: cria/reutiliza automaticamente na biblioteca dentro da mesma transacao.
+## Main Resources and Endpoints
 
-## Endpoints
+### User
 
-Todos exigem Bearer token Auth0, exceto webhooks e health root.
-
-### Usuario
-
-- `POST /api/user`
-- `GET /api/user`
-- `PATCH /api/user`
-- `DELETE /api/user`
+- `POST /api/user` — create or update a user after Auth0 login.
+- `GET /api/user` — retrieve the authenticated user profile.
+- `PATCH /api/user` — update the user profile.
+- `DELETE /api/user` — delete the user.
 
 ### Students
 
-- `POST /api/student`
-- `GET /api/students`
-- `GET /api/students/active`
-- `GET /api/student/:studentId`
-- `PATCH /api/student/:studentId`
-- `DELETE /api/student/:studentId`
+- `POST /api/student` — create a student linked to the trainer.
+- `GET /api/students` — list all students for the trainer.
+- `GET /api/students/active` — list active students.
+- `GET /api/student/:studentId` — get a specific student.
+- `PATCH /api/student/:studentId` — update a student.
+- `DELETE /api/student/:studentId` — delete a student.
+
+### Trainer Plans (`UserPlan`)
+
+- `POST /api/userplan` — create a trainer service plan.
+- `GET /api/userplans` — list trainer plans.
+- `GET /api/userplan/:id` — get a specific plan.
+- `PATCH /api/userplan/:id` — update a plan.
+- `DELETE /api/userplan/:id` — delete a plan.
 
 ### Expenses
 
-- `POST /api/expense`
-- `GET /api/expenses`
-- `GET /api/expense/:id`
-- `DELETE /api/expense/:id`
+- `POST /api/expense` — record an expense.
+- `GET /api/expenses` — list expenses.
+- `GET /api/expense/:id` — get expense details.
+- `DELETE /api/expense/:id` — delete an expense.
 
-### User Plans (planos do personal)
+### SaaS Plans
 
-- `POST /api/userplan`
-- `GET /api/userplans`
-- `GET /api/userplan/:id`
-- `PATCH /api/userplan/:id`
-- `DELETE /api/userplan/:id`
-
-### SaaS Plans (admin)
-
-- `POST /api/saasplan`
+- `POST /api/saasplan` — create a SaaS plan (ADMIN only).
 
 ### Diet Plans
 
-- `POST /api/diet-plan`
-- `GET /api/diet-plans`
-- `GET /api/diet-plan/:dietPlanId`
-- `PATCH /api/diet-plan/:dietPlanId`
-- `DELETE /api/diet-plan/:dietPlanId`
-- `GET /api/meals`
+- `POST /api/diet-plan` — create a diet plan.
+- `GET /api/diet-plans` — list diet plans.
+- `GET /api/diet-plan/:dietPlanId` — get a diet plan by ID.
+- `PATCH /api/diet-plan/:dietPlanId` — update a diet plan.
+- `DELETE /api/diet-plan/:dietPlanId` — delete a diet plan.
+- `GET /api/meals` — get the meals library.
 
 ### Training Sheets
 
-- `POST /api/training-sheet`
-- `GET /api/training-sheets`
-- `GET /api/training-sheet/:trainingSheetId`
-- `PATCH /api/training-sheet/:trainingSheetId`
-- `DELETE /api/training-sheet/:trainingSheetId`
+- `POST /api/training-sheet` — create a training sheet.
+- `GET /api/training-sheets` — list training sheets.
+- `GET /api/training-sheet/:trainingSheetId` — get a training sheet by ID.
+- `PATCH /api/training-sheet/:trainingSheetId` — update a training sheet.
+- `DELETE /api/training-sheet/:trainingSheetId` — delete a training sheet.
 
 ### Exercise Library
 
-- `POST /api/exercise`
-- `GET /api/exercises`
-- `GET /api/exercise/:exerciseId`
-- `PATCH /api/exercise/:exerciseId`
-- `DELETE /api/exercise/:exerciseId`
+- `POST /api/exercise` — create an exercise.
+- `GET /api/exercises` — list exercises.
+- `GET /api/exercise/:exerciseId` — get an exercise.
+- `PATCH /api/exercise/:exerciseId` — update an exercise.
+- `DELETE /api/exercise/:exerciseId` — delete an exercise.
 
-### Stripe Platform e Connect
+### Stripe and Billing
 
-- `POST /api/create-checkout-session`
-- `POST /api/create-portal-session`
-- `POST /api/create-connect-account`
-- `POST /api/create-account-link`
-- `POST /api/checkout/connect`
+- `POST /api/create-checkout-session` — start a Stripe Checkout session for SaaS subscription or payment.
+- `POST /api/create-portal-session` — create a Stripe Billing Portal session.
+- `POST /api/create-connect-account` — create a Stripe Connect account for the trainer.
+- `POST /api/create-account-link` — generate an onboarding link for the Connect account.
+- `POST /api/checkout/connect` — create a checkout session for a trainer plan using Stripe Connect.
 
-### Webhooks (sem Auth)
+### User Tax ID (CPF)
 
-- `POST /webhook/stripe/platform`
-- `POST /webhook/stripe/connect`
+- `POST /api/cpf` — create a CPF record.
+- `GET /api/cpf/:id` — retrieve a CPF record.
+- `DELETE /api/cpf/:id` — delete a CPF record.
 
-## Exemplos de payload
+### Stripe Webhooks
 
-### Criar exercicio
+- `POST /webhook/stripe/platform` — receive Stripe platform events.
+- `POST /webhook/stripe/connect` — receive Stripe Connect account events.
 
-```json
-{
-  "name": "Remada Curvada",
-  "description": "Pegada pronada, foco em dorsais"
-}
-```
+## Front-end Usage Flows
 
-### Criar training sheet com exercicio existente + inline
+### 1. Student registration and linking
 
-```json
-{
-  "name": "Treino A - Superiores",
-  "startDate": "2026-03-22T08:00:00.000Z",
-  "studentId": "11111111-2222-4333-8444-555555555555",
-  "exercises": [
-    {
-      "exerciseId": "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee",
-      "sets": 4,
-      "repetitions": "8-10",
-      "order": 0
-    },
-    {
-      "exerciseName": "Desenvolvimento com Halteres",
-      "sets": 3,
-      "repetitions": "10-12",
-      "order": 1
-    }
-  ]
-}
-```
+1. The trainer creates a student with `POST /api/student`.
+2. The student authenticates using Auth0.
+3. The front-end calls `POST /api/user` to synchronize the profile.
+4. The backend attempts automatic student linking by email.
 
-## Setup local
+### 2. Creating training sheets with inline exercises
 
-### Pre-requisitos
+`POST /api/training-sheet` accepts exercise items with either:
 
-- Node.js 18+
-- PostgreSQL
-- Tenant Auth0
-- Conta Stripe
+- `exerciseId` — use an existing exercise.
+- `exerciseName` — create a new exercise in the trainer's library automatically.
 
-### Instalacao
+### 3. Billing flow
 
-```bash
-npm install
-```
+- `POST /api/create-checkout-session` starts the Stripe Checkout flow.
+- `POST /api/create-portal-session` redirects to the Stripe Billing Portal.
+- `POST /api/checkout/connect` starts a checkout flow for student billing via trainer plans.
 
-### Variaveis de ambiente
+## Best Practices for API Consumers
 
-Configure `.env` com:
+- Send `Authorization: Bearer <token>` on all protected `/api` requests.
+- Use the Auth0 `sub` claim to identify the user in the backend.
+- Handle `401` and `403` responses for authentication and authorization issues.
+- Use returned resource IDs to perform updates and deletes reliably.
 
-- `PORT`
-- `DATABASE_URL`
-- `AUDIENCE`
-- `ISSUER_BASE_URL`
-- `CLIENT_ID`
-- `BASE_URL`
-- `STRIPE_API_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `STRIPE_CONNECT_WEBHOOK_SECRET` (recomendado)
+## License
 
-### Banco e Prisma
-
-```bash
-npx prisma migrate dev
-npx prisma generate
-```
-
-### Rodar em desenvolvimento
-
-```bash
-npm run dev
-```
-
-### Build e testes
-
-```bash
-npm run build
-npm test -- --runInBand
-```
-
-## Deploy checklist
-
-1. Build e testes verdes.
-2. Aplicar migrations no ambiente alvo:
-
-```bash
-npx prisma migrate deploy
-```
-
-3. Garantir env vars de Auth0 e Stripe.
-4. Configurar endpoints de webhook na Stripe.
-5. Smoke test de rotas criticas:
-   - `POST /api/user`
-   - `GET /api/training-sheets`
-   - `GET /api/diet-plans`
-   - `POST /api/create-checkout-session` (apenas personal)
-
-## Estrutura do projeto
-
-- `src/app.ts` setup da aplicacao e rotas
-- `src/controllers` validacao e camada HTTP
-- `src/services` regra de negocio
-- `src/middlewares` autenticacao/autorizacao e guard rails
-- `src/routes` agrupamento de endpoints
-- `prisma/schema.prisma` modelo de dados
-
-## Licenca
-
-Licenca a definir.
+This project is licensed under the MIT License.

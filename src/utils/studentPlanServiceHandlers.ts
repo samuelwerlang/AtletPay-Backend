@@ -1,7 +1,8 @@
 import config from "../config/config.js";
 import Stripe from "stripe";
-import { Prisma } from "@prisma/client";
-import { StudentPlanStatus } from "@prisma/client";
+import pkg from "@prisma/client";
+const { StudentPlanStatus } = pkg;
+import type { Prisma as PrismaType } from "@prisma/client";
 
 const stripe = new Stripe(config.STRIPE_API_KEY);
 
@@ -45,7 +46,7 @@ function mapStripeStudentPlanStatusToPrisma(
 }
 
 async function calculatePaymentIntentStudentPlanEndDate(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   userPlanId: string,
   userId: string,
 ) {
@@ -72,7 +73,7 @@ async function calculateSubscriptionStudentPlanDates(sub: Stripe.Subscription) {
 }
 
 async function fetchUserPlanBasedOnUserId(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   userPlanId: string,
   userId: string,
 ) {
@@ -91,7 +92,7 @@ async function fetchUserPlanBasedOnUserId(
 }
 
 async function fetchStudentBasedOnUserId(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   studentId: string,
   userId: string,
 ) {
@@ -108,7 +109,7 @@ async function fetchStudentBasedOnUserId(
 }
 
 async function checkActiveStudentPlan(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   studentId: string,
 ) {
   const now = new Date();

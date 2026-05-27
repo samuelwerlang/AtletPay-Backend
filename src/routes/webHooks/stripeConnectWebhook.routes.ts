@@ -9,7 +9,8 @@ import {
   markChargeFailedService,
   createChargeService,
 } from "../../services/charges.services.js";
-import { ChargeStatus, StudentPlanStatus } from "@prisma/client";
+import pkg from "@prisma/client";
+const { ChargeStatus, StudentPlanStatus } = pkg;
 
 import {
   cancelStudentPlanService,

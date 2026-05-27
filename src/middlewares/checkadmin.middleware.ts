@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma.js";
-import { UserRole } from "@prisma/client";
+import pkg from "@prisma/client";
+const { UserRole } = pkg;
 
 async function requireAdmin(req: Request, res: Response, next: NextFunction) {
   try {

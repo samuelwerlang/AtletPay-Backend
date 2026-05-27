@@ -1,11 +1,13 @@
 import { prisma } from "../lib/prisma.js";
-import { UserRole } from "@prisma/client";
+import pkg from "@prisma/client";
+const { UserRole } = pkg;
+import type { UserRole as UserRoleType } from "@prisma/client";
 
 export interface IUserData {
   sub: string;
   email: string;
   name?: string;
-  role?: UserRole;
+  role?: UserRoleType;
   stripeCustomerId?: string;
   stripeAccountId?: string;
 }

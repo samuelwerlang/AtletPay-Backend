@@ -1,10 +1,14 @@
-import { Prisma } from "@prisma/client";
+import type {
+  Prisma as PrismaType,
+  ChargeStatus as ChargeStatusType,
+} from "@prisma/client";
+import pkg from "@prisma/client";
+const { ChargeStatus } = pkg;
 import { prisma } from "../lib/prisma.js";
-import { ChargeStatus } from "@prisma/client";
 
 interface ICharge {
   studentId: string;
-  status: ChargeStatus; // aluno que vai pagar
+  status: ChargeStatusType; // aluno que vai pagar
   amount: number;
   externalId: string; // cents
   description?: string;
@@ -18,7 +22,7 @@ interface IUpdateChargePayment {
 }
 
 async function createChargeService(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   data: ICharge,
 ) {
   const { studentId, amount, description, status, externalId, paidAt } = data;
@@ -36,7 +40,7 @@ async function createChargeService(
 }
 
 async function markChargePaidService(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   data: IUpdateChargePayment,
 ) {
   const { chargeId, externalId, studentPlanId } = data;
@@ -53,7 +57,7 @@ async function markChargePaidService(
 }
 
 async function markChargeFailedService(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   chargeId: string,
 ) {
   return await tx.charge.update({

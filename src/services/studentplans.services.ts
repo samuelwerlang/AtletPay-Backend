@@ -1,6 +1,7 @@
-import { Prisma } from "@prisma/client";
+import pkg from "@prisma/client";
+const { StudentPlanStatus } = pkg;
+import type { Prisma as PrismaType } from "@prisma/client";
 import Stripe from "stripe";
-import { StudentPlanStatus } from "@prisma/client";
 import { recomputeStudentActiveFlag } from "./students.services.js";
 import {
   calculateSubscriptionStudentPlanDates,
@@ -16,7 +17,7 @@ export interface IStudentPlan {
 }
 
 async function upsertStudentPlanBasedOnPaymentIntentService(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   studentPlanInfo: IStudentPlan,
   userId: string,
   stripePaymentIntent: Stripe.PaymentIntent,
@@ -60,7 +61,7 @@ async function upsertStudentPlanBasedOnPaymentIntentService(
 }
 
 async function upsertStudentPlanBasedOnSubscriptionService(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   studentPlanInfo: IStudentPlan,
   userId: string,
   stripeSubscription: Stripe.Subscription,
@@ -102,7 +103,7 @@ async function upsertStudentPlanBasedOnSubscriptionService(
 }
 
 async function cancelStudentPlanService(
-  tx: Prisma.TransactionClient,
+  tx: PrismaType.TransactionClient,
   studentPlanId: string,
   userId: string,
 ) {

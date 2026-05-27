@@ -1,7 +1,9 @@
 import config from "../config/config.js";
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
-import { UserPlanRecurringIntervalType } from "@prisma/client";
+import pkg from "@prisma/client";
+const { UserPlanRecurringIntervalType } = pkg;
+import type { UserPlanRecurringIntervalType as UserPlanRecurringIntervalTypeType } from "@prisma/client";
 import {
   createRecurrentProductService,
   createOneTimeProductService,
@@ -16,7 +18,7 @@ interface IPlanInfo {
   durationInMonths: number;
   sessionsPerWeek: number;
   isRecurrent: boolean;
-  intervalType?: UserPlanRecurringIntervalType;
+  intervalType?: UserPlanRecurringIntervalTypeType;
 }
 
 async function createUserPlanService(

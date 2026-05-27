@@ -1,7 +1,8 @@
 import config from "../config/config.js";
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
-import { SubscriptionStatus } from "@prisma/client";
+import pkg from "@prisma/client";
+const { SubscriptionStatus } = pkg;
 
 import {
   createSubscriptionService,

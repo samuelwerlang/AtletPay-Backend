@@ -1,4 +1,5 @@
-import { Prisma } from "@prisma/client";
+import pkg from "@prisma/client";
+const { Prisma } = pkg;
 import { Request, Response, NextFunction } from "express";
 import { ZodError } from "zod";
 

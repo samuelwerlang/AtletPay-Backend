@@ -1,7 +1,8 @@
 import * as z from "zod";
 import { Request, Response } from "express";
 import createSaasPlanService from "../services/saasplan.services.js";
-import { SaasPlanType } from "@prisma/client";
+import pkg from "@prisma/client";
+const { SaasPlanType } = pkg;
 
 const createSaasPlanSchema = z.object({
   name: z.string().min(1),

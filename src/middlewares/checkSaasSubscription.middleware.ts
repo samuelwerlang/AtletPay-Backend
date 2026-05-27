@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma.js";
-import { SubscriptionStatus, UserRole } from "@prisma/client";
+import pkg from "@prisma/client";
+const { SubscriptionStatus, UserRole } = pkg;
 export async function checkSaasSubscription(
   req: Request,
   res: Response,

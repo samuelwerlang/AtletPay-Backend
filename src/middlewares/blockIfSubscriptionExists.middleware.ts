@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../lib/prisma.js";
-import { SubscriptionStatus } from "@prisma/client";
+import pkg from "@prisma/client";
+const { SubscriptionStatus } = pkg;
 
 async function blockIfSubscriptionExists(
   req: Request,

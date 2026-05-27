@@ -6,7 +6,8 @@ import {
   updateUserService,
   getUserService,
 } from "../services/users.service.js";
-import { UserRole } from "@prisma/client";
+import pkg from "@prisma/client";
+const { UserRole } = pkg;
 
 const authUserInfoSchema = z.object({
   sub: z.string().min(1),

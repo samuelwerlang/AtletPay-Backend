@@ -1,4 +1,5 @@
-import { StudentPlanStatus, UserRole } from "@prisma/client";
+import pkg from "@prisma/client";
+const { StudentPlanStatus, UserRole } = pkg;
 import { prisma } from "../lib/prisma.js";
 
 async function deactivateStudents() {

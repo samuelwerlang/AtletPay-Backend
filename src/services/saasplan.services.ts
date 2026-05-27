@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { SaasPlanType } from "@prisma/client";
+import type { SaasPlanType } from "@prisma/client";
 
 interface ISaasPlanInfo {
   name: string;

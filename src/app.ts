@@ -26,7 +26,8 @@ import createConnectAccount from "./routes/Connect/stripeCreateConnectedAccount.
 import linkConnectAccount from "./routes/Connect/stripeConnectedAccountLink.routes.js";
 
 import { rateLimit } from "express-rate-limit";
-import { StudentPlanStatus } from "@prisma/client";
+import pkg from "@prisma/client";
+const { StudentPlanStatus } = pkg;
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -53,7 +54,7 @@ app.use("/webhook", stripeStudentWebhook);
 app.use(express.json());
 
 // ================= PUBLIC ROUTES ==========
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
   res.json({ status: "API running" });
 });
 

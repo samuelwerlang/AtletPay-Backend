@@ -1,4 +1,6 @@
-import { StudentPlanStatus } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import pkg from "@prisma/client";
+const { StudentPlanStatus } = pkg;
 import { prisma } from "../lib/prisma.js";
 
 interface IStudent {
@@ -110,8 +112,6 @@ async function deleteStudentService(userId: string, studentId: string) {
     },
   });
 }
-
-import { Prisma } from "@prisma/client";
 
 async function recomputeStudentActiveFlag(
   tx: Prisma.TransactionClient,

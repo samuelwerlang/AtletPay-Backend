@@ -1,12 +1,14 @@
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
-import { SubscriptionStatus } from "@prisma/client";
+import pkg from "@prisma/client";
+const { SubscriptionStatus } = pkg;
+import type { SubscriptionStatus as SubscriptionStatusType } from "@prisma/client";
 export interface SubscriptionDTO {
   userId: string;
   saasPlanId: string;
   stripeCustomerId: string;
   stripeSubscriptionId: string;
-  status: SubscriptionStatus;
+  status: SubscriptionStatusType;
   cancelAtPeriodEnd?: boolean;
   currentPeriodEnd: Date;
   currentPeriodStart: Date;

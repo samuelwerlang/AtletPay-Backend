@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { UserRole } from "@prisma/client";
+import pkg from "@prisma/client";
+const { UserRole } = pkg;
 import { prisma } from "../lib/prisma.js";
 
 async function checkStudentReadOnly(

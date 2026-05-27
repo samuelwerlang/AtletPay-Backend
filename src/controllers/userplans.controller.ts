@@ -8,7 +8,8 @@ import {
   getAllUserPlansService,
   updateUserPlanService,
 } from "../services/userplans.services.js";
-import { UserPlanRecurringIntervalType } from "@prisma/client";
+import pkg from "@prisma/client";
+const { UserPlanRecurringIntervalType } = pkg;
 
 const userPlanSchema = z.object({
   name: z.string().min(1),

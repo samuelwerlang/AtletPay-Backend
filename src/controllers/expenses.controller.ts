@@ -7,7 +7,8 @@ import {
   getAllExpensesService,
   getExpenseByIdService,
 } from "../services/expenses.services.js";
-import { EXPENSE_CATEGORY } from "@prisma/client";
+import pkg from "@prisma/client";
+const { EXPENSE_CATEGORY } = pkg;
 
 const expenseSchema = z.object({
   name: z.string().min(1).max(255),

@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { EXPENSE_CATEGORY } from "@prisma/client";
+import type { EXPENSE_CATEGORY } from "@prisma/client";
 
 export interface ICreateExpense {
   name: string;

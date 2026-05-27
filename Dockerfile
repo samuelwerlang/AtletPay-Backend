@@ -13,7 +13,7 @@ COPY . .
 RUN npx prisma generate
 RUN npm run build
 
-# Base image for running the application - using Node.js 22.18.0 on Alpine Linux for a smaller image size
+# Base image for running the application - using Node.js 22.18.0 - slim for a smaller image size
 FROM node:22.18.0-slim
 
 WORKDIR /app

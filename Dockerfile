@@ -26,7 +26,6 @@ RUN npm install --production
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY .env .env
 
 # Exposing the port that the application will run on
 EXPOSE 8080
